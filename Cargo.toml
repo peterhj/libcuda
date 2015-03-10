@@ -1,0 +1,8 @@
+[package]
+name = "cuda"
+version = "0.1.0"
+authors = ["Peter Jin <peterhaijin@gmail.com>"]
+
+[lib]
+name = "cuda"
+path = "src/lib.rs"
