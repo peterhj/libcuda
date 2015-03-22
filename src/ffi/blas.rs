@@ -34,10 +34,10 @@ pub enum cublasOperation_t {
   C = 2,
 }
 
-#[link(name = "cublas")]
+#[link(name = "cublas", kind = "dylib")]
 extern "C" {
   // Helper Functions
-  pub fn cublasCreate(handle: *mut cublasHandle_t) -> cublasStatus_t;
+  pub fn cublasCreate_v2(handle: *mut cublasHandle_t) -> cublasStatus_t;
   pub fn cublasDestroy(handle: cublasHandle_t) -> cublasStatus_t;
   pub fn cublasGetVersion(handle: cublasHandle_t, version: *mut c_int) -> cublasStatus_t;
   pub fn cublasSetStream(handle: cublasHandle_t, streamId: cudaStream_t) -> cublasStatus_t;
@@ -67,7 +67,7 @@ extern "C" {
   // TODO
 
   // Level 3 Functions
-  pub fn cublasSgemm(handle: cublasHandle_t,
+  pub fn cublasSgemm_v2(handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
     alpha: *const c_float,

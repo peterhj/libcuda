@@ -625,7 +625,7 @@ pub struct textureReference {
 
 pub type cudaStreamCallback_t = extern "C" fn (cudaStream_t, cudaError_t, *mut c_void);
 
-#[link(name = "cudart")]
+#[link(name = "cudart", kind = "dylib")]
 extern "C" {
   // Error Handling
   pub fn cudaGetErrorName(error: cudaError_t) -> *mut c_char;
