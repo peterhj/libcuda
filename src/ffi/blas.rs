@@ -48,26 +48,29 @@ extern "C" {
   // TODO
 
   // Level 2 Functions
-  pub fn cublasSgemv(handle: cublasHandle_t,
+  pub fn cublasSgemv_v2(
+    handle: cublasHandle_t,
     trans: cublasOperation_t,
     m: c_int, n: c_int,
     alpha: *const c_float,
-    A: *const c_float, lda: c_int,
+    a: *const c_float, lda: c_int,
     x: *const c_float, incx: c_int,
     beta: *const c_float,
     y: *mut c_float, incy: c_int) -> cublasStatus_t;
-  pub fn cublasCgemv(handle: cublasHandle_t,
+  pub fn cublasCgemv_v2(
+    handle: cublasHandle_t,
     trans: cublasOperation_t,
     m: c_int, n: c_int,
     alpha: *const cuComplex,
-    A: *const cuComplex, lda: c_int,
+    a: *const cuComplex, lda: c_int,
     x: *const cuComplex, incx: c_int,
     beta: *const cuComplex,
     y: *mut cuComplex, incy: c_int) -> cublasStatus_t;
   // TODO
 
   // Level 3 Functions
-  pub fn cublasSgemm_v2(handle: cublasHandle_t,
+  pub fn cublasSgemm_v2(
+    handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
     alpha: *const c_float,
@@ -75,7 +78,8 @@ extern "C" {
     B: *const c_float, ldb: c_int,
     beta: *const c_float,
     C: *mut c_float, ldc: c_int) -> cublasStatus_t;
-  pub fn cublasSgemmBatched(handle: cublasHandle_t,
+  pub fn cublasSgemmBatched(
+    handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
     alpha: *const c_float,
@@ -84,7 +88,8 @@ extern "C" {
     beta: *const c_float,
     C: *mut *mut c_float, ldc: c_int,
     batchCount: c_int) -> cublasStatus_t;
-  pub fn cublasCgemm(handle: cublasHandle_t,
+  pub fn cublasCgemm_v2(
+    handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
     alpha: *const cuComplex,
@@ -92,7 +97,8 @@ extern "C" {
     B: *const cuComplex, ldb: c_int,
     beta: *const cuComplex,
     C: *mut cuComplex, ldc: c_int) -> cublasStatus_t;
-  pub fn cublasCgemmBatched(handle: cublasHandle_t,
+  pub fn cublasCgemmBatched(
+    handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
     alpha: *const cuComplex,

@@ -27,6 +27,36 @@ impl CublasHandle {
   }
 }
 
+pub fn cublas_sgemv(
+  handle: &CublasHandle,
+  a_trans: bool,
+  m: usize, n: usize,
+  alpha: f32,
+  a: *const f32, lda: usize,
+  x: *const f32, incx: usize,
+  beta: f32,
+  y: *mut f32, incy: usize,
+) -> Result<(), CublasError>
+{
+  let op_a = match a_trans {
+    false => cublasOperation_t::N,
+    true => cublasOperation_t::T,
+  };
+  let status_code = unsafe {
+    cublasSgemv_v2(
+      handle.ptr,
+      op_a,
+      m as c_int, n as c_int,
+      &alpha as *const f32,
+      a, lda as c_int,
+      x, incx as c_int,
+      &beta as *const f32,
+      y, incy as c_int,
+    )
+  };
+  CublasError::new((), status_code)
+}
+
 pub fn cublas_sgemm(
   handle: &CublasHandle,
   a_trans: bool, b_trans: bool,
