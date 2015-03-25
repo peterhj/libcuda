@@ -45,6 +45,24 @@ extern "C" {
   // TODO
 
   // Level 1 Functions
+  pub fn cublasSaxpy_v2(
+    handle: cublasHandle_t,
+    n: c_int,
+    alpha: *const f32,
+    x: *const f32, incx: c_int,
+    y: *mut f32, incy: c_int) -> cublasStatus_t;
+  pub fn cublasScopy_v2(
+    handle: cublasHandle_t,
+    n: c_int,
+    x: *const f32, incx: c_int,
+    y: *mut f32, incy: c_int,
+  ) -> cublasStatus_t;
+  pub fn cublasSscal_v2(
+    handle: cublasHandle_t,
+    n: c_int,
+    alpha: *const f32,
+    x: *mut f32, incx: c_int,
+  ) -> cublasStatus_t;
   // TODO
 
   // Level 2 Functions
@@ -52,11 +70,11 @@ extern "C" {
     handle: cublasHandle_t,
     trans: cublasOperation_t,
     m: c_int, n: c_int,
-    alpha: *const c_float,
-    a: *const c_float, lda: c_int,
-    x: *const c_float, incx: c_int,
-    beta: *const c_float,
-    y: *mut c_float, incy: c_int) -> cublasStatus_t;
+    alpha: *const f32,
+    a: *const f32, lda: c_int,
+    x: *const f32, incx: c_int,
+    beta: *const f32,
+    y: *mut f32, incy: c_int) -> cublasStatus_t;
   pub fn cublasCgemv_v2(
     handle: cublasHandle_t,
     trans: cublasOperation_t,
@@ -73,20 +91,20 @@ extern "C" {
     handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
-    alpha: *const c_float,
-    A: *const c_float, lda: c_int,
-    B: *const c_float, ldb: c_int,
-    beta: *const c_float,
-    C: *mut c_float, ldc: c_int) -> cublasStatus_t;
+    alpha: *const f32,
+    A: *const f32, lda: c_int,
+    B: *const f32, ldb: c_int,
+    beta: *const f32,
+    C: *mut f32, ldc: c_int) -> cublasStatus_t;
   pub fn cublasSgemmBatched(
     handle: cublasHandle_t,
     transa: cublasOperation_t, transb: cublasOperation_t,
     m: c_int, n: c_int, k: c_int,
-    alpha: *const c_float,
-    A: *mut *const c_float, lda: c_int,
-    B: *mut *const c_float, ldb: c_int,
-    beta: *const c_float,
-    C: *mut *mut c_float, ldc: c_int,
+    alpha: *const f32,
+    A: *mut *const f32, lda: c_int,
+    B: *mut *const f32, ldb: c_int,
+    beta: *const f32,
+    C: *mut *mut f32, ldc: c_int,
     batchCount: c_int) -> cublasStatus_t;
   pub fn cublasCgemm_v2(
     handle: cublasHandle_t,

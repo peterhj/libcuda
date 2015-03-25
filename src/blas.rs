@@ -27,6 +27,62 @@ impl CublasHandle {
   }
 }
 
+pub fn cublas_saxpy(
+  handle: &CublasHandle,
+  n: usize,
+  alpha: f32,
+  x: *const f32, incx: usize,
+  y: *mut f32, incy: usize,
+) -> Result<(), CublasError>
+{
+  let status_code = unsafe {
+    cublasSaxpy_v2(
+      handle.ptr,
+      n as c_int,
+      &alpha as *const f32,
+      x, incx as c_int,
+      y, incy as c_int,
+    )
+  };
+  CublasError::new((), status_code)
+}
+
+pub fn cublas_scopy(
+  handle: &CublasHandle,
+  n: usize,
+  x: *const f32, incx: usize,
+  y: *mut f32, incy: usize,
+) -> Result<(), CublasError>
+{
+  let status_code = unsafe {
+    cublasScopy_v2(
+      handle.ptr,
+      n as c_int,
+      x, incx as c_int,
+      y, incy as c_int,
+    )
+  };
+  CublasError::new((), status_code)
+}
+
+pub fn cublas_sscal(
+  handle: &CublasHandle,
+  n: usize,
+  alpha: f32,
+  x: *mut f32, incx: usize,
+) -> Result<(), CublasError>
+{
+  let status_code = unsafe {
+    cublasSscal_v2(
+      handle.ptr,
+      n as c_int,
+      &alpha as *const f32,
+      x, incx as c_int,
+    )
+  };
+  CublasError::new((), status_code)
+}
+
 pub fn cublas_sgemv(
   handle: &CublasHandle,
   a_trans: bool,
