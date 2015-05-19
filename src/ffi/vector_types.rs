@@ -2,14 +2,14 @@
 
 use libc::{c_float, c_double};
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub struct float2 {
   float0: c_float,
   float1: c_float,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub struct double2 {
   float0: c_double,

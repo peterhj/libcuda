@@ -45,7 +45,7 @@ pub type cudaStream_t = *mut CUstream_st;
 
 pub type cudaSurfaceObject_t = c_ulonglong;
 
-#[derive(Copy, Eq, PartialEq, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 #[repr(C)]
 pub enum cudaError {
   Success                      =      0,
@@ -130,7 +130,7 @@ pub enum cudaError {
   ApiFailureBase               =  10000,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaChannelFormatKind {
   Signed = 0,
@@ -139,7 +139,7 @@ pub enum cudaChannelFormatKind {
   None = 3,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaComputeMode {
   Default = 0,
@@ -148,7 +148,7 @@ pub enum cudaComputeMode {
   ExclusiveProcess = 3,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaDeviceAttr {
   MaxThreadsPerBlock             = 1,
@@ -237,7 +237,7 @@ pub enum cudaDeviceAttr {
   MultiGpuBoardGroupID           = 85,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaFuncCache {
   PreferNone = 0,
@@ -246,7 +246,7 @@ pub enum cudaFuncCache {
   PreferEqual = 3,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaGraphicsCubeFace {
   PositiveX = 0x00,
@@ -257,7 +257,7 @@ pub enum cudaGraphicsCubeFace {
   NegativeZ = 0x05,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaGraphicsMapFlags {
   None = 0,
@@ -265,7 +265,7 @@ pub enum cudaGraphicsMapFlags {
   WriteDiscard = 2,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaGraphicsRegisterFlags {
   None = 0,
@@ -275,7 +275,7 @@ pub enum cudaGraphicsRegisterFlags {
   TextureGather = 8,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaLimit {
   StackSize = 0x00,
@@ -285,7 +285,7 @@ pub enum cudaLimit {
   DevRuntimePendingLaunchCount = 0x04,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaMemcpyKind {
   HostToHost = 0,
@@ -295,21 +295,21 @@ pub enum cudaMemcpyKind {
   Default = 4,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaMemoryType {
   Host = 1,
   Device = 2,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaOutputMode {
   KeyValuePair = 0x00,
   CSV = 0x01,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaResourceType {
   Array = 0x00,
@@ -318,7 +318,7 @@ pub enum cudaResourceType {
   Pitch2D = 0x03,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaResourceViewFormat {
   None                      = 0x00,
@@ -358,7 +358,7 @@ pub enum cudaResourceViewFormat {
   UnsignedBlockCompressed7  = 0x22,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaSharedMemConfig {
   BankSizeDefault = 0,
@@ -366,7 +366,7 @@ pub enum cudaSharedMemConfig {
   BankSizeEightByte = 2,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaSurfaceBoundaryMode {
   Zero = 0,
@@ -374,14 +374,14 @@ pub enum cudaSurfaceBoundaryMode {
   Trap = 2,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaSurfaceFormatMode {
   Forced = 0,
   Auto = 1,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaTextureAddressMode {
   Wrap = 0,
@@ -390,14 +390,14 @@ pub enum cudaTextureAddressMode {
   Border = 3,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaTextureFilterMode {
   Point = 0,
   Linear = 1,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cudaTextureReadMode {
   ElementType = 0,
@@ -722,11 +722,12 @@ extern "C" {
   pub fn cudaMallocPitch(devPtr: *mut *mut c_void, pitch: *mut size_t, width: size_t, height: size_t) -> cudaError_t;
   pub fn cudaMemGetInfo(free: *mut size_t, total: *mut size_t) -> cudaError_t;
   pub fn cudaMemcpy(dst: *mut c_void, src: *const c_void, count: size_t, kind: cudaMemcpyKind) -> cudaError_t;
-  //pub fn cudaMemcpy2D() -> cudaError_t;
+  pub fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: size_t, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
+  // ...
+  pub fn cudaMemcpy2D(dst: *mut c_void, dpitch: size_t, src: *const c_void, spitch: size_t, width: size_t, height: size_t, kind: cudaMemcpyKind) -> cudaError_t;
+  pub fn cudaMemcpy2DAsync(dst: *mut c_void, dpitch: size_t, src: *const c_void, spitch: size_t, width: size_t, height: size_t, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
   // ...
   //pub fn cudaMemcpy3D() -> cudaError_t;
-  // ...
-  pub fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: size_t, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
   // ...
   pub fn cudaMemcpyPeer(dst: *mut c_void, dstDevice: c_int, src: *const c_void, srcDevice: c_int, count: size_t) -> cudaError_t;
   pub fn cudaMemcpyPeerAsync(dst: *mut c_void, dstDevice: c_int, src: *const c_void, srcDevice: c_int, count: size_t, stream: cudaStream_t) -> cudaError_t;

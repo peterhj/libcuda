@@ -8,7 +8,7 @@ use libc::{
   c_void, c_int, c_uint, c_float, c_double, size_t,
 };
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cufftResult {
   Success                 = 0,
@@ -27,7 +27,7 @@ pub enum cufftResult {
   NoWorkspace             = 13,
 }
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cufftType {
   R2C = 0x2a,
@@ -44,7 +44,7 @@ pub type cufftDoubleReal = c_double;
 pub type cufftComplex = cuComplex;
 pub type cufftDoubleComplex = cuDoubleComplex;
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub enum cufftCompatibility {
   Native          = 0,
