@@ -20,8 +20,33 @@ impl CublasError {
 pub type CublasResult<T> = Result<T, CublasError>;
 
 pub enum CublasPointerMode {
-  HostPointers,
-  DevicePointers,
+  Host,
+  Device,
+}
+
+impl CublasPointerMode {
+  pub fn to_ffi(&self) -> cublasPointerMode_t {
+    match self {
+      &CublasPointerMode::Host   => cublasPointerMode_t::CUBLAS_POINTER_MODE_HOST,
+      &CublasPointerMode::Device => cublasPointerMode_t::CUBLAS_POINTER_MODE_DEVICE,
+    }
+  }
+}
+
+pub enum CublasTranspose {
+  N,
+  T,
+  H,
+}
+
+impl CublasTranspose {
+  pub fn to_ffi(&self) -> cublasOperation_t {
+    match self {
+      &CublasTranspose::N => cublasOperation_t::CUBLAS_OP_N,
+      &CublasTranspose::T => cublasOperation_t::CUBLAS_OP_T,
+      &CublasTranspose::H => cublasOperation_t::CUBLAS_OP_C,
+    }
+  }
 }
 
 pub struct CublasHandle {
@@ -47,11 +72,7 @@ impl CublasHandle {
   }
 
   pub fn set_pointer_mode(&self, pointer_mode: CublasPointerMode) -> CublasResult<()> {
-    let mode = match pointer_mode {
-      CublasPointerMode::HostPointers   => cublasPointerMode_t::CUBLAS_POINTER_MODE_HOST,
-      CublasPointerMode::DevicePointers => cublasPointerMode_t::CUBLAS_POINTER_MODE_DEVICE,
-    };
-    let status_code = unsafe { cublasSetPointerMode_v2(self.ptr, mode) };
+    let status_code = unsafe { cublasSetPointerMode_v2(self.ptr, pointer_mode.to_ffi()) };
     match status_code {
       cublasStatus_t::Success => Ok(()),
       c => Err(CublasError::new(c)),
@@ -59,7 +80,7 @@ impl CublasHandle {
   }
 }
 
-pub fn cublas_saxpy(
+pub unsafe fn cublas_saxpy(
   handle: &CublasHandle,
   n: usize,
   alpha: f32,
@@ -67,7 +88,7 @@ pub fn cublas_saxpy(
   y: *mut f32, incy: usize,
 ) -> CublasResult<()>
 {
-  let status_code = unsafe {
+  let status_code = {
     cublasSaxpy_v2(
       handle.ptr,
       n as c_int,
@@ -82,14 +103,14 @@ pub fn cublas_saxpy(
   }
 }
 
-pub fn cublas_scopy(
+pub unsafe fn cublas_scopy(
   handle: &CublasHandle,
   n: usize,
   x: *const f32, incx: usize,
   y: *mut f32, incy: usize,
 ) -> CublasResult<()>
 {
-  let status_code = unsafe {
+  let status_code = {
     cublasScopy_v2(
       handle.ptr,
       n as c_int,
@@ -103,14 +124,14 @@ pub fn cublas_scopy(
   }
 }
 
-pub fn cublas_sscal(
+pub unsafe fn cublas_sscal(
   handle: &CublasHandle,
   n: usize,
   alpha: f32,
   x: *mut f32, incx: usize,
 ) -> CublasResult<()>
 {
-  let status_code = unsafe {
+  let status_code = {
     // FIXME: scalar passing convention depends on current context settings.
     cublasSscal_v2(
       handle.ptr,
@@ -125,9 +146,9 @@ pub fn cublas_sscal(
   }
 }
 
-pub fn cublas_sgemv(
+pub unsafe fn cublas_sgemv(
   handle: &CublasHandle,
-  a_trans: bool,
+  a_trans: CublasTranspose,
   m: usize, n: usize,
   alpha: f32,
   a: *const f32, lda: usize,
@@ -136,15 +157,11 @@ pub fn cublas_sgemv(
   y: *mut f32, incy: usize,
 ) -> CublasResult<()>
 {
-  let op_a = match a_trans {
-    false => cublasOperation_t::CUBLAS_OP_N,
-    true => cublasOperation_t::CUBLAS_OP_T,
-  };
-  let status_code = unsafe {
+  let status_code = {
     // FIXME: scalar passing convention depends on current context settings.
     cublasSgemv_v2(
       handle.ptr,
-      op_a,
+      a_trans.to_ffi(),
       m as c_int, n as c_int,
       &alpha as *const f32,
       a, lda as c_int,
@@ -159,9 +176,9 @@ pub fn cublas_sgemv(
   }
 }
 
-pub fn cublas_sgemm(
+pub unsafe fn cublas_sgemm(
   handle: &CublasHandle,
-  a_trans: bool, b_trans: bool,
+  a_trans: CublasTranspose, b_trans: CublasTranspose,
   m: usize, n: usize, k: usize,
   alpha: f32,
   a: *const f32, lda: usize,
@@ -170,19 +187,11 @@ pub fn cublas_sgemm(
   c: *mut f32, ldc: usize,
 ) -> CublasResult<()>
 {
-  let op_a = match a_trans {
-    false => cublasOperation_t::CUBLAS_OP_N,
-    true => cublasOperation_t::CUBLAS_OP_T,
-  };
-  let op_b = match b_trans {
-    false => cublasOperation_t::CUBLAS_OP_N,
-    true => cublasOperation_t::CUBLAS_OP_T,
-  };
-  let status_code = unsafe {
+  let status_code = {
     // FIXME: scalar passing convention depends on current context settings.
     cublasSgemm_v2(
       handle.ptr,
-      op_a, op_b,
+      a_trans.to_ffi(), b_trans.to_ffi(),
       m as c_int, n as c_int, k as c_int,
       &alpha as *const f32,
       a, lda as c_int,

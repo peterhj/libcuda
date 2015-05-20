@@ -276,12 +276,10 @@ pub fn cuda_alloc_pinned(size: usize, flags: u32) -> CudaResult<*mut u8> {
   }
 }
 
-pub fn cuda_free_pinned(ptr: *mut u8) -> CudaResult<()> {
-  unsafe {
-    match cudaFreeHost(ptr as *mut c_void) {
-      Success => Ok(()),
-      e => Err(CudaError(e)),
-    }
+pub unsafe fn cuda_free_pinned(ptr: *mut u8) -> CudaResult<()> {
+  match cudaFreeHost(ptr as *mut c_void) {
+    Success => Ok(()),
+    e => Err(CudaError(e)),
   }
 }
 
@@ -296,12 +294,10 @@ pub fn cuda_alloc_device(size: usize) -> CudaResult<*mut u8> {
   }
 }
 
-pub fn cuda_free_device(dev_ptr: *mut u8) -> CudaResult<()> {
-  unsafe {
-    match cudaFree(dev_ptr as *mut c_void) {
-      Success => Ok(()),
-      e => Err(CudaError(e)),
-    }
+pub unsafe fn cuda_free_device(dev_ptr: *mut u8) -> CudaResult<()> {
+  match cudaFree(dev_ptr as *mut c_void) {
+    Success => Ok(()),
+    e => Err(CudaError(e)),
   }
 }
 
