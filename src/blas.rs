@@ -53,6 +53,9 @@ pub struct CublasHandle {
   ptr: cublasHandle_t,
 }
 
+impl !Send for CublasHandle {
+}
+
 impl CublasHandle {
   pub fn create() -> CublasResult<CublasHandle> {
     let mut handle: cublasHandle_t = 0 as cublasHandle_t;

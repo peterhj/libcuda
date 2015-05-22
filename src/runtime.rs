@@ -60,9 +60,9 @@ pub fn cuda_get_runtime_version() -> CudaResult<i32> {
 
 // TODO: device flags.
 
-pub struct Device;
+pub struct CudaDevice;
 
-impl Device {
+impl CudaDevice {
   pub fn count() -> CudaResult<usize> {
     let mut count: c_int = 0;
     unsafe {
@@ -247,7 +247,9 @@ impl CudaEvent {
   }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct CudaMemInfo {
+  pub used: usize,
   pub free: usize,
   pub total: usize,
 }
@@ -258,6 +260,7 @@ pub fn cuda_get_mem_info() -> CudaResult<CudaMemInfo> {
     let mut total: size_t = 0;
     match cudaMemGetInfo(&mut free as *mut size_t, &mut total as *mut size_t) {
       Success => Ok(CudaMemInfo{
+        used: (total - free) as usize,
         free: free as usize,
         total: total as usize,
       }),
@@ -266,13 +269,11 @@ pub fn cuda_get_mem_info() -> CudaResult<CudaMemInfo> {
   }
 }
 
-pub fn cuda_alloc_pinned(size: usize, flags: u32) -> CudaResult<*mut u8> {
-  unsafe {
-    let mut ptr = 0 as *mut c_void;
-    match cudaHostAlloc(&mut ptr as *mut *mut c_void, size as size_t, flags) {
-      Success => Ok(ptr as *mut u8),
-      e => Err(CudaError(e)),
-    }
+pub unsafe fn cuda_alloc_pinned(size: usize, flags: u32) -> CudaResult<*mut u8> {
+  let mut ptr = 0 as *mut c_void;
+  match cudaHostAlloc(&mut ptr as *mut *mut c_void, size as size_t, flags) {
+    Success => Ok(ptr as *mut u8),
+    e => Err(CudaError(e)),
   }
 }
 
@@ -283,14 +284,11 @@ pub unsafe fn cuda_free_pinned(ptr: *mut u8) -> CudaResult<()> {
   }
 }
 
-pub fn cuda_alloc_device(size: usize) -> CudaResult<*mut u8> {
-  //println!("DEBUG: calling alloc_device()");
-  unsafe {
-    let mut ptr = 0 as *mut c_void;
-    match cudaMalloc(&mut ptr as *mut *mut c_void, size as u64) {
-      Success => Ok(ptr as *mut u8),
-      e => Err(CudaError(e)),
-    }
+pub unsafe fn cuda_alloc_device(size: usize) -> CudaResult<*mut u8> {
+  let mut ptr = 0 as *mut c_void;
+  match cudaMalloc(&mut ptr as *mut *mut c_void, size as u64) {
+    Success => Ok(ptr as *mut u8),
+    e => Err(CudaError(e)),
   }
 }
 
