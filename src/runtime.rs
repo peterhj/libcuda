@@ -357,7 +357,12 @@ pub enum CudaMemcpyKind {
   Unified,
 }
 
-pub unsafe fn cuda_memcpy(dst: *mut u8, src: *const u8, size: usize, kind: CudaMemcpyKind) -> CudaResult<()> {
+pub unsafe fn cuda_memcpy(
+    dst: *mut u8,
+    src: *const u8,
+    size: usize,
+    kind: CudaMemcpyKind) -> CudaResult<()>
+{
   let kind = match kind {
     CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
     CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
@@ -365,13 +370,24 @@ pub unsafe fn cuda_memcpy(dst: *mut u8, src: *const u8, size: usize, kind: CudaM
     CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
     CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
   };
-  match cudaMemcpy(dst as *mut c_void, src as *const c_void, size as size_t, kind) {
+  match cudaMemcpy(
+      dst as *mut c_void,
+      src as *const c_void,
+      size as size_t,
+      kind)
+  {
     Success => Ok(()),
     e => Err(CudaError(e)),
   }
 }
 
-pub unsafe fn cuda_memcpy_async(dst: *mut u8, src: *const u8, size: usize, kind: CudaMemcpyKind, stream: &CudaStream) -> CudaResult<()> {
+pub unsafe fn cuda_memcpy_async(
+    dst: *mut u8,
+    src: *const u8,
+    size: usize,
+    kind: CudaMemcpyKind,
+    stream: &CudaStream) -> CudaResult<()>
+{
   let kind = match kind {
     CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
     CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
@@ -379,13 +395,41 @@ pub unsafe fn cuda_memcpy_async(dst: *mut u8, src: *const u8, size: usize, kind:
     CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
     CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
   };
-  match cudaMemcpyAsync(dst as *mut c_void, src as *const c_void, size as size_t, kind, stream.ptr) {
+  match cudaMemcpyAsync(
+      dst as *mut c_void,
+      src as *const c_void,
+      size as size_t,
+      kind,
+      stream.ptr)
+  {
     Success => Ok(()),
     e => Err(CudaError(e)),
   }
 }
 
-pub unsafe fn cuda_memcpy_2d(dst: *mut u8, dst_pitch: usize, src: *const u8, src_pitch: usize, width: usize, height: usize, kind: CudaMemcpyKind) -> CudaResult<()> {
+pub unsafe fn cuda_memcpy_peer_async(
+    dst: *mut u8, dst_device_idx: usize,
+    src: *const u8, src_device_idx: usize,
+    size: usize,
+    stream: &CudaStream) -> CudaResult<()>
+{
+  match cudaMemcpyPeerAsync(
+      dst as *mut c_void, dst_device_idx as c_int,
+      src as *const c_void, src_device_idx as c_int,
+      size as size_t,
+      stream.ptr)
+  {
+    Success => Ok(()),
+    e => Err(CudaError(e)),
+  }
+}
+
+pub unsafe fn cuda_memcpy_2d(
+    dst: *mut u8, dst_pitch: usize,
+    src: *const u8, src_pitch: usize,
+    width: usize, height: usize,
+    kind: CudaMemcpyKind) -> CudaResult<()>
+{
   let kind = match kind {
     CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
     CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
@@ -393,7 +437,12 @@ pub unsafe fn cuda_memcpy_2d(dst: *mut u8, dst_pitch: usize, src: *const u8, src
     CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
     CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
   };
-  match cudaMemcpy2D(dst as *mut c_void, dst_pitch as size_t, src as *const c_void, src_pitch as size_t, width as size_t, height as size_t, kind) {
+  match cudaMemcpy2D(
+      dst as *mut c_void, dst_pitch as size_t,
+      src as *const c_void, src_pitch as size_t,
+      width as size_t, height as size_t,
+      kind)
+  {
     Success => Ok(()),
     e => Err(CudaError(e)),
   }
