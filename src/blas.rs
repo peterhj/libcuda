@@ -66,7 +66,7 @@ impl CublasHandle {
     }
   }
 
-  pub fn set_stream(&self, stream: &CudaStream) -> CublasResult<()> {
+  pub fn set_stream<'a>(&'a self, stream: &'a CudaStream) -> CublasResult<()> {
     let status_code = unsafe { cublasSetStream_v2(self.ptr, stream.ptr) };
     match status_code {
       cublasStatus_t::Success => Ok(()),

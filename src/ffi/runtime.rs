@@ -717,7 +717,7 @@ extern "C" {
   pub fn cudaMalloc3DArray(array: *mut cudaArray_t, desc: *const cudaChannelFormatDesc, extent: cudaExtent, flags: c_uint) -> cudaError_t;
   pub fn cudaMallocArray(array: *mut cudaArray_t, desc: *const cudaChannelFormatDesc, width: size_t, height: size_t, flags: c_uint) -> cudaError_t;
   pub fn cudaMallocHost(ptr: *mut *mut c_void, size: size_t) -> cudaError_t;
-  pub fn cudaMallocManaged(devPtR: *mut *mut c_void, size: size_t, flags: c_uint) -> cudaError_t;
+  pub fn cudaMallocManaged(devPtr: *mut *mut c_void, size: size_t, flags: c_uint) -> cudaError_t;
   pub fn cudaMallocMipmappedArray(mipmappedArray: *mut cudaMipmappedArray_t, desc: *const cudaChannelFormatDesc, extent: cudaExtent, numLevels: c_uint, flags: c_uint) -> cudaError_t;
   pub fn cudaMallocPitch(devPtr: *mut *mut c_void, pitch: *mut size_t, width: size_t, height: size_t) -> cudaError_t;
   pub fn cudaMemGetInfo(free: *mut size_t, total: *mut size_t) -> cudaError_t;
@@ -743,5 +743,7 @@ extern "C" {
   // ...
 
   // Peer Device Memory Access
-  // ...
+  pub fn cudaDeviceCanAccessPeer(canAccessPeer: *mut c_int, device: c_int, peer_device: c_int) -> cudaError_t;
+  pub fn cudaDeviceDisablePeerAccess(peerDevice: c_int) -> cudaError_t;
+  pub fn cudaDeviceEnablePeerAccess(peerDevice: c_int, flags: c_uint) -> cudaError_t;
 }

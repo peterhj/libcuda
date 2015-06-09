@@ -80,6 +80,14 @@ impl CudaDevice {
     }*/
   }
 
+  pub fn get_current() -> CudaResult<usize> {
+    let mut index: c_int = 0;
+    match unsafe { cudaGetDevice(&mut index as *mut c_int) } {
+      Success => Ok(index as usize),
+      e => Err(CudaError(e)),
+    }
+  }
+
   pub fn set_current(index: usize) -> CudaResult<()> {
     unsafe {
       match cudaSetDevice(index as c_int) {
@@ -95,6 +103,34 @@ impl CudaDevice {
       cudaSetDeviceFlags(flags);
     }
     Ok(())
+  }
+
+  pub fn can_access_peer(idx: usize, peer_idx: usize) -> CudaResult<bool> {
+    unsafe {
+      let mut access: c_int = 0;
+      match cudaDeviceCanAccessPeer(&mut access as *mut c_int, idx as c_int, peer_idx as c_int) {
+        Success => Ok(access != 0),
+        e => Err(CudaError(e)),
+      }
+    }
+  }
+
+  pub fn enable_peer_access(peer_idx: usize) -> CudaResult<()> {
+    unsafe {
+      match cudaDeviceEnablePeerAccess(peer_idx as c_int, 0) {
+        Success => Ok(()),
+        e => Err(CudaError(e)),
+      }
+    }
+  }
+
+  pub fn disable_peer_access(peer_idx: usize) -> CudaResult<()> {
+    unsafe {
+      match cudaDeviceDisablePeerAccess(peer_idx as c_int) {
+        Success => Ok(()),
+        e => Err(CudaError(e)),
+      }
+    }
   }
 }
 
