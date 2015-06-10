@@ -4,8 +4,8 @@ use ffi::runtime::*;
 use ffi::runtime::cudaError::{Success};
 
 use libc::{c_void, c_int, c_uint, size_t};
-//use libc::funcs::c95::{strlen};
 use std::mem::{transmute};
+use std::ptr::{null_mut};
 
 #[repr(C)]
 pub struct Dim3 {
@@ -157,13 +157,13 @@ impl Drop for CudaStream {
 impl CudaStream {
   pub fn default() -> CudaStream {
     CudaStream{
-      ptr: 0 as cudaStream_t,
+      ptr: null_mut(),
     }
   }
 
   pub fn create() -> CudaResult<CudaStream> {
     unsafe {
-      let mut ptr = 0 as cudaStream_t;
+      let mut ptr: cudaStream_t = null_mut();
       match cudaStreamCreate(&mut ptr as *mut cudaStream_t) {
         Success => {
           Ok(CudaStream{
@@ -178,7 +178,7 @@ impl CudaStream {
   pub fn create_with_flags(flags: i32) -> CudaResult<CudaStream> {
     unsafe {
       // TODO: flags.
-      let mut ptr = 0 as cudaStream_t;
+      let mut ptr: cudaStream_t = null_mut();
       match cudaStreamCreate(&mut ptr as *mut cudaStream_t) {
         Success => {
           Ok(CudaStream{
@@ -193,7 +193,7 @@ impl CudaStream {
   pub fn create_with_priority(flags: i32, priority: i32) -> CudaResult<CudaStream> {
     unsafe {
       // TODO: flags and priority.
-      let mut ptr = 0 as cudaStream_t;
+      let mut ptr: cudaStream_t = null_mut();
       match cudaStreamCreate(&mut ptr as *mut cudaStream_t) {
         Success => {
           Ok(CudaStream{
@@ -213,6 +213,11 @@ impl CudaStream {
       }
     }
   }
+}
+
+pub enum CudaEventStatus {
+  Completed,
+  NotReady,
 }
 
 pub struct CudaEvent {
@@ -270,6 +275,16 @@ impl CudaEvent {
         Success => Ok(()),
         e => Err(CudaError(e)),
       }
+    }
+  }
+
+  pub fn query(&self) -> CudaResult<CudaEventStatus> {
+    match unsafe { cudaEventQuery(self.ptr) } {
+      Success => Ok(CudaEventStatus::Completed),
+      e => match e {
+        cudaError::NotReady => Ok(CudaEventStatus::NotReady),
+        e => Err(CudaError(e)),
+      },
     }
   }
 
