@@ -216,7 +216,7 @@ impl CudaStream {
 }
 
 pub enum CudaEventStatus {
-  Completed,
+  Complete,
   NotReady,
 }
 
@@ -280,7 +280,7 @@ impl CudaEvent {
 
   pub fn query(&self) -> CudaResult<CudaEventStatus> {
     match unsafe { cudaEventQuery(self.ptr) } {
-      Success => Ok(CudaEventStatus::Completed),
+      Success => Ok(CudaEventStatus::Complete),
       e => match e {
         cudaError::NotReady => Ok(CudaEventStatus::NotReady),
         e => Err(CudaError(e)),
