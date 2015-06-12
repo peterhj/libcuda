@@ -97,12 +97,26 @@ impl CudaDevice {
     }
   }
 
-  pub fn reset_with_flags(flags: u32) -> CudaResult<()> {
-    unsafe {
-      cudaDeviceReset();
-      cudaSetDeviceFlags(flags);
+  pub fn reset() -> CudaResult<()> {
+    match unsafe { cudaDeviceReset() } {
+      Success => Ok(()),
+      e => Err(CudaError(e)),
     }
-    Ok(())
+  }
+
+  pub fn set_flags(flags: u32) -> CudaResult<()> {
+    match unsafe { cudaSetDeviceFlags(flags as c_uint) } {
+      Success => Ok(()),
+      e => Err(CudaError(e)),
+    }
+  }
+
+  pub fn get_attribute(device_idx: usize, ffi_attr: cudaDeviceAttr) -> CudaResult<i32> {
+    let mut value: c_int = 0;
+    match unsafe { cudaDeviceGetAttribute(&mut value as *mut c_int, ffi_attr, device_idx as c_int) } {
+      Success => Ok(value as i32),
+      e => Err(CudaError(e)),
+    }
   }
 
   pub fn can_access_peer(idx: usize, peer_idx: usize) -> CudaResult<bool> {

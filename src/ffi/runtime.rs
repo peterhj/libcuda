@@ -132,6 +132,17 @@ pub enum cudaError {
 
 #[derive(Clone, Copy)]
 #[repr(C)]
+pub enum cudaDeviceFlags {
+  ScheduleAuto          = 0x00,
+  ScheduleSpin          = 0x01,
+  ScheduleYield         = 0x02,
+  ScheduleBlockingSync  = 0x04,
+  MapHost               = 0x08,
+  LmemResizeToMax       = 0x10,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
 pub enum cudaChannelFormatKind {
   Signed = 0,
   Unsigned = 1,
