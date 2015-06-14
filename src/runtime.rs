@@ -476,3 +476,29 @@ pub unsafe fn cuda_memcpy_2d(
     e => Err(CudaError(e)),
   }
 }
+
+pub unsafe fn cuda_memcpy_2d_async(
+    dst: *mut u8, dst_pitch: usize,
+    src: *const u8, src_pitch: usize,
+    width: usize, height: usize,
+    kind: CudaMemcpyKind,
+    stream: &CudaStream) -> CudaResult<()>
+{
+  let kind = match kind {
+    CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
+    CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
+    CudaMemcpyKind::DeviceToHost    => cudaMemcpyKind::DeviceToHost,
+    CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
+    CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
+  };
+  match cudaMemcpy2DAsync(
+      dst as *mut c_void, dst_pitch as size_t,
+      src as *const c_void, src_pitch as size_t,
+      width as size_t, height as size_t,
+      kind,
+      stream.ptr)
+  {
+    Success => Ok(()),
+    e => Err(CudaError(e)),
+  }
+}
