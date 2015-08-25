@@ -3,7 +3,6 @@
 
 extern crate libc;
 
-pub mod blas;
 pub mod dnn;
 pub mod driver;
 pub mod ffi;

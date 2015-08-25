@@ -1,4 +1,3 @@
-pub mod blas;
 pub mod dnn;
 pub mod fft;
 pub mod runtime;
