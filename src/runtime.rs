@@ -227,6 +227,13 @@ impl CudaStream {
       }
     }
   }
+
+  pub fn wait_event(&self, event: &CudaEvent) -> CudaResult<()> {
+    match unsafe { cudaStreamWaitEvent(self.ptr, event.ptr, 0) } {
+      Success => Ok(()),
+      e => Err(CudaError(e))
+    }
+  }
 }
 
 pub enum CudaEventStatus {
