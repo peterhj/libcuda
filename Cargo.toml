@@ -7,3 +7,6 @@ build = "build.rs"
 [lib]
 name = "cuda"
 path = "src/lib.rs"
+
+[dependencies]
+libc = "*"

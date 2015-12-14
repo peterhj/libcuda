@@ -4,8 +4,11 @@ use ffi::runtime::*;
 use ffi::runtime::cudaError::{Success};
 
 use libc::{c_void, c_int, c_uint, size_t};
+use std::cell::{RefCell};
 use std::mem::{transmute};
+use std::ops::{Range};
 use std::ptr::{null_mut};
+use std::sync::{Arc};
 
 #[repr(C)]
 pub struct Dim3 {
@@ -71,6 +74,10 @@ impl CudaDevice {
         e => Err(CudaError(e)),
       }
     }
+  }
+
+  pub fn iter() -> CudaResult<Range<usize>> {
+    Self::count().and_then(|count| Ok((0 .. count)))
   }
 
   pub fn get_properties(&self) {
@@ -155,6 +162,9 @@ pub struct CudaStream {
 impl !Send for CudaStream {
 }
 
+impl !Sync for CudaStream {
+}
+
 impl Drop for CudaStream {
   fn drop(&mut self) {
     if !self.ptr.is_null() {
@@ -234,6 +244,13 @@ impl CudaStream {
       e => Err(CudaError(e))
     }
   }
+
+  pub fn wait_shared_event(&self, event: &SharedCudaEvent) -> CudaResult<()> {
+    match unsafe { cudaStreamWaitEvent(self.ptr, event.inner.ptr, 0) } {
+      Success => Ok(()),
+      e => Err(CudaError(e))
+    }
+  }
 }
 
 pub enum CudaEventStatus {
@@ -245,8 +262,14 @@ pub struct CudaEvent {
   pub ptr: cudaEvent_t,
 }
 
-impl !Send for CudaEvent {
-}
+// FIXME(20151211): events may be used but not freed outside their context
+// (e.g., by cudaStreamWaitEvent).
+
+impl !Send for CudaEvent {}
+impl !Sync for CudaEvent {}
+
+//unsafe impl Send for CudaEvent {}
+//unsafe impl Sync for CudaEvent {}
 
 impl Drop for CudaEvent {
   fn drop(&mut self) {
@@ -274,6 +297,10 @@ impl CudaEvent {
         e => Err(CudaError(e)),
       }
     }
+  }
+
+  pub fn create_fastest() -> CudaResult<CudaEvent> {
+    Self::create_with_flags(0x02)
   }
 
   pub fn create_with_flags(flags: u32) -> CudaResult<CudaEvent> {
@@ -319,6 +346,144 @@ impl CudaEvent {
   }
 }
 
+thread_local!(static EVENT_POOL: RefCell<EventReclaimPool> = RefCell::new(EventReclaimPool::new()));
+
+struct EventReclaimPool {
+  events: Vec<Arc<RawCudaEvent>>,
+}
+
+impl EventReclaimPool {
+  pub fn new() -> EventReclaimPool {
+    EventReclaimPool{
+      events: vec![],
+    }
+  }
+
+  pub fn add_event(&mut self, event: Arc<RawCudaEvent>) {
+    self.events.push(event);
+  }
+
+  pub fn collect_garbage(&mut self) {
+    let mut i = 0;
+    while i < self.events.len() {
+      if Arc::strong_count(&self.events[i]) == 1 {
+        let event = self.events.swap_remove(i);
+        event.unsafe_drop();
+      } else {
+        i += 1;
+      }
+    }
+  }
+}
+
+struct RawCudaEvent {
+  ptr:  cudaEvent_t,
+}
+
+impl RawCudaEvent {
+  /// RawCudaEvent must be manually dropped, otherwise Drop::drop() tends to
+  /// result in a CudartUnloading error.
+  fn unsafe_drop(&self) {
+    if !self.ptr.is_null() {
+      unsafe {
+        match cudaEventDestroy(self.ptr) {
+          Success => (),
+          e => panic!("FATAL: RawCudaEvent::drop(): failed to destroy: {:?}", e),
+        }
+      }
+    }
+  }
+}
+
+pub struct OwnedCudaEvent {
+  inner:  Arc<RawCudaEvent>,
+}
+
+impl !Send for OwnedCudaEvent {}
+impl !Sync for OwnedCudaEvent {}
+
+impl Drop for OwnedCudaEvent {
+  fn drop(&mut self) {
+    EVENT_POOL.with(|pool| {
+      let mut pool = pool.borrow_mut();
+      pool.collect_garbage();
+      pool.add_event(self.inner.clone());
+    });
+  }
+}
+
+impl OwnedCudaEvent {
+  pub fn create_fastest() -> CudaResult<OwnedCudaEvent> {
+    Self::create_with_flags(0x02)
+  }
+
+  pub fn create_with_flags(flags: u32) -> CudaResult<OwnedCudaEvent> {
+    EVENT_POOL.with(|pool| {
+      let mut pool = pool.borrow_mut();
+      pool.collect_garbage();
+    });
+    unsafe {
+      let mut ptr = 0 as cudaEvent_t;
+      match cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags as c_uint) {
+        Success => {
+          Ok(OwnedCudaEvent{
+            inner:  Arc::new(RawCudaEvent{ptr: ptr}),
+          })
+        },
+        e => Err(CudaError(e)),
+      }
+    }
+  }
+
+  pub fn share(&self) -> SharedCudaEvent {
+    SharedCudaEvent{inner: self.inner.clone()}
+  }
+
+  pub fn record(&self, stream: &CudaStream) -> CudaResult<()> {
+    unsafe {
+      match cudaEventRecord(self.inner.ptr, stream.ptr) {
+        Success => Ok(()),
+        e => Err(CudaError(e)),
+      }
+    }
+  }
+
+  pub fn query(&self) -> CudaResult<CudaEventStatus> {
+    match unsafe { cudaEventQuery(self.inner.ptr) } {
+      Success => Ok(CudaEventStatus::Complete),
+      e => match e {
+        cudaError::NotReady => Ok(CudaEventStatus::NotReady),
+        e => Err(CudaError(e)),
+      },
+    }
+  }
+
+  pub fn synchronize(&self) -> CudaResult<()> {
+    unsafe {
+      match cudaEventSynchronize(self.inner.ptr) {
+        Success => Ok(()),
+        e => Err(CudaError(e)),
+      }
+    }
+  }
+}
+
+pub struct SharedCudaEvent {
+  inner:  Arc<RawCudaEvent>,
+}
+
+unsafe impl Send for SharedCudaEvent {}
+unsafe impl Sync for SharedCudaEvent {}
+
+impl Clone for SharedCudaEvent {
+  fn clone(&self) -> SharedCudaEvent {
+    SharedCudaEvent{inner: self.inner.clone()}
+  }
+}
+
+impl SharedCudaEvent {
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct CudaMemInfo {
   pub used: usize,
@@ -358,7 +523,7 @@ pub unsafe fn cuda_free_pinned(ptr: *mut u8) -> CudaResult<()> {
 
 pub unsafe fn cuda_alloc_device(size: usize) -> CudaResult<*mut u8> {
   let mut ptr = 0 as *mut c_void;
-  match cudaMalloc(&mut ptr as *mut *mut c_void, size as u64) {
+  match cudaMalloc(&mut ptr as *mut *mut c_void, size) {
     Success => Ok(ptr as *mut u8),
     e => Err(CudaError(e)),
   }
