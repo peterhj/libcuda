@@ -4,9 +4,18 @@ version = "0.1.0"
 authors = ["Peter Jin <peterhaijin@gmail.com>"]
 build = "build.rs"
 
+[features]
+default = []
+cuda-7-0 = []
+cuda-7-5 = []
+
+[dependencies]
+libc = "*"
+
 [lib]
 name = "cuda"
 path = "src/lib.rs"
 
-[dependencies]
-libc = "*"
+[[bin]]
+name = "test-cuda"
+path = "tools/test-cuda.rs"
