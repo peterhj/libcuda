@@ -16,25 +16,25 @@ pub struct dim3 {
   z: c_uint,
 }
 
-enum cudaArray {}
+pub enum cudaArray {}
 pub type cudaArray_t = *mut cudaArray;
 pub type cudaArray_const_t = *mut cudaArray;
 
 pub type cudaError_t = cudaError;
 
-enum CUevent_st {}
+pub enum CUevent_st {}
 pub type cudaEvent_t = *mut CUevent_st;
 
-enum cudaGraphicsResource {}
+pub enum cudaGraphicsResource {}
 pub type cudaGraphicsResource_t = *mut cudaGraphicsResource;
 
-enum cudaMipmappedArray {}
+pub enum cudaMipmappedArray {}
 pub type cudaMipmappedArray_t = *mut cudaMipmappedArray;
 pub type cudaMipmappedArray_const_t = *mut cudaMipmappedArray;
 
 pub type cudaOutputMode_t = cudaOutputMode;
 
-enum CUstream_st {}
+pub enum CUstream_st {}
 pub type cudaStream_t = *mut CUstream_st;
 
 pub type cudaSurfaceObject_t = c_ulonglong;

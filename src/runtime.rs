@@ -202,7 +202,8 @@ impl CudaStream {
     }
   }
 
-  pub fn create_with_flags(flags: i32) -> CudaResult<CudaStream> {
+  pub fn create_with_flags(_flags: i32) -> CudaResult<CudaStream> {
+    unimplemented!();
     unsafe {
       // TODO: flags.
       let mut ptr: cudaStream_t = null_mut();
@@ -217,7 +218,8 @@ impl CudaStream {
     }
   }
 
-  pub fn create_with_priority(flags: i32, priority: i32) -> CudaResult<CudaStream> {
+  pub fn create_with_priority(_flags: i32, _priority: i32) -> CudaResult<CudaStream> {
+    unimplemented!();
     unsafe {
       // TODO: flags and priority.
       let mut ptr: cudaStream_t = null_mut();
