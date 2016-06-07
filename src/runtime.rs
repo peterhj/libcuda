@@ -271,7 +271,7 @@ pub struct CudaEvent {
 //impl !Sync for CudaEvent {}
 
 unsafe impl Send for CudaEvent {}
-//unsafe impl Sync for CudaEvent {}
+unsafe impl Sync for CudaEvent {}
 
 impl Drop for CudaEvent {
   fn drop(&mut self) {
