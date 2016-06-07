@@ -267,13 +267,10 @@ pub struct CudaEvent {
   pub ptr: cudaEvent_t,
 }
 
-// FIXME(20151211): events may be used but not freed outside their context
-// (e.g., by cudaStreamWaitEvent).
+//impl !Send for CudaEvent {}
+//impl !Sync for CudaEvent {}
 
-impl !Send for CudaEvent {}
-impl !Sync for CudaEvent {}
-
-//unsafe impl Send for CudaEvent {}
+unsafe impl Send for CudaEvent {}
 //unsafe impl Sync for CudaEvent {}
 
 impl Drop for CudaEvent {
