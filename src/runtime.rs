@@ -234,6 +234,15 @@ impl CudaStream {
     }
   }
 
+  pub fn add_callback(&self, callback: extern "C" fn (stream: cudaStream_t, status: cudaError_t, user_data: *mut c_void), user_data: *mut c_void) -> CudaResult<()> {
+    unsafe {
+      match cudaStreamAddCallback(self.ptr, callback, user_data, 0) {
+        cudaError::Success => Ok(()),
+        e => Err(CudaError(e)),
+      }
+    }
+  }
+
   pub fn synchronize(&self) -> CudaResult<()> {
     unsafe {
       match cudaStreamSynchronize(self.ptr) {

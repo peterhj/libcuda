@@ -20,8 +20,6 @@ pub enum cudaArray {}
 pub type cudaArray_t = *mut cudaArray;
 pub type cudaArray_const_t = *mut cudaArray;
 
-pub type cudaError_t = cudaError;
-
 pub enum CUevent_st {}
 pub type cudaEvent_t = *mut CUevent_st;
 
@@ -41,7 +39,7 @@ pub type cudaSurfaceObject_t = c_ulonglong;
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 #[repr(C)]
-pub enum cudaError {
+pub enum cudaError_t {
   Success                      =      0,
   MissingConfiguration         =      1,
   MemoryAllocation             =      2,
