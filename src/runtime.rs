@@ -4,7 +4,7 @@ use ffi::runtime::*;
 
 use libc::{c_void, c_int, c_uint, size_t};
 use std::cell::{RefCell};
-use std::mem::{transmute};
+use std::mem::{size_of, transmute};
 use std::ops::{Range};
 use std::ptr::{null_mut};
 use std::sync::{Arc};
@@ -158,11 +158,10 @@ pub struct CudaStream {
   pub ptr: cudaStream_t,
 }
 
-impl !Send for CudaStream {
-}
-
-impl !Sync for CudaStream {
-}
+//impl !Send for CudaStream {}
+//impl !Sync for CudaStream {}
+unsafe impl Send for CudaStream {}
+unsafe impl Sync for CudaStream {}
 
 impl Drop for CudaStream {
   fn drop(&mut self) {
@@ -259,12 +258,12 @@ impl CudaStream {
     }
   }
 
-  pub fn wait_shared_event(&self, event: &SharedCudaEvent) -> CudaResult<()> {
+  /*pub fn wait_shared_event(&self, event: &SharedCudaEvent) -> CudaResult<()> {
     match unsafe { cudaStreamWaitEvent(self.ptr, event.inner.ptr, 0) } {
       cudaError_t::Success => Ok(()),
       e => Err(CudaError(e))
     }
-  }
+  }*/
 }
 
 pub enum CudaEventStatus {
@@ -275,9 +274,6 @@ pub enum CudaEventStatus {
 pub struct CudaEvent {
   pub ptr: cudaEvent_t,
 }
-
-//impl !Send for CudaEvent {}
-//impl !Sync for CudaEvent {}
 
 unsafe impl Send for CudaEvent {}
 unsafe impl Sync for CudaEvent {}
@@ -361,7 +357,7 @@ impl CudaEvent {
   }
 }
 
-thread_local!(static EVENT_POOL: RefCell<EventReclaimPool> = RefCell::new(EventReclaimPool::new()));
+/*thread_local!(static EVENT_POOL: RefCell<EventReclaimPool> = RefCell::new(EventReclaimPool::new()));
 
 struct EventReclaimPool {
   events: Vec<Arc<RawCudaEvent>>,
@@ -501,7 +497,7 @@ impl Clone for SharedCudaEvent {
 }
 
 impl SharedCudaEvent {
-}
+}*/
 
 #[derive(Clone, Copy, Debug)]
 pub struct CudaMemInfo {
@@ -540,15 +536,16 @@ pub unsafe fn cuda_free_pinned(ptr: *mut u8) -> CudaResult<()> {
   }
 }
 
-pub unsafe fn cuda_alloc_device(size: usize) -> CudaResult<*mut u8> {
-  let mut ptr = 0 as *mut c_void;
+pub unsafe fn cuda_alloc_device<T>(len: usize) -> CudaResult<*mut T> where T: Copy {
+  let mut ptr: *mut c_void = null_mut();
+  let size = len * size_of::<T>();
   match cudaMalloc(&mut ptr as *mut *mut c_void, size) {
-    cudaError_t::Success => Ok(ptr as *mut u8),
+    cudaError_t::Success => Ok(ptr as *mut T),
     e => Err(CudaError(e)),
   }
 }
 
-pub unsafe fn cuda_free_device(dev_ptr: *mut u8) -> CudaResult<()> {
+pub unsafe fn cuda_free_device<T>(dev_ptr: *mut T) -> CudaResult<()> where T: Copy {
   match cudaFree(dev_ptr as *mut c_void) {
     cudaError_t::Success => Ok(()),
     e => Err(CudaError(e)),
@@ -569,6 +566,7 @@ pub unsafe fn cuda_memset_async(dev_ptr: *mut u8, value: i32, size: usize, strea
   }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub enum CudaMemcpyKind {
   HostToHost,
   HostToDevice,
@@ -577,49 +575,49 @@ pub enum CudaMemcpyKind {
   Unified,
 }
 
-pub unsafe fn cuda_memcpy(
-    dst: *mut u8,
-    src: *const u8,
-    size: usize,
+impl CudaMemcpyKind {
+  pub fn to_ffi(&self) -> cudaMemcpyKind {
+    match *self {
+      CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
+      CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
+      CudaMemcpyKind::DeviceToHost    => cudaMemcpyKind::DeviceToHost,
+      CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
+      CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
+    }
+  }
+}
+
+pub unsafe fn cuda_memcpy<T>(
+    dst: *mut T,
+    src: *const T,
+    len: usize,
     kind: CudaMemcpyKind) -> CudaResult<()>
+where T: Copy
 {
-  let kind = match kind {
-    CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
-    CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
-    CudaMemcpyKind::DeviceToHost    => cudaMemcpyKind::DeviceToHost,
-    CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
-    CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
-  };
   match cudaMemcpy(
       dst as *mut c_void,
       src as *const c_void,
-      size as size_t,
-      kind)
+      (len * size_of::<T>()) as size_t,
+      kind.to_ffi())
   {
     cudaError_t::Success => Ok(()),
     e => Err(CudaError(e)),
   }
 }
 
-pub unsafe fn cuda_memcpy_async(
-    dst: *mut u8,
-    src: *const u8,
-    size: usize,
+pub unsafe fn cuda_memcpy_async<T>(
+    dst: *mut T,
+    src: *const T,
+    len: usize,
     kind: CudaMemcpyKind,
     stream: &CudaStream) -> CudaResult<()>
+where T: Copy
 {
-  let kind = match kind {
-    CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
-    CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
-    CudaMemcpyKind::DeviceToHost    => cudaMemcpyKind::DeviceToHost,
-    CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
-    CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
-  };
   match cudaMemcpyAsync(
       dst as *mut c_void,
       src as *const c_void,
-      size as size_t,
-      kind,
+      (len * size_of::<T>()) as size_t,
+      kind.to_ffi(),
       stream.ptr)
   {
     cudaError_t::Success => Ok(()),
@@ -627,16 +625,17 @@ pub unsafe fn cuda_memcpy_async(
   }
 }
 
-pub unsafe fn cuda_memcpy_peer_async(
-    dst: *mut u8, dst_device_idx: usize,
-    src: *const u8, src_device_idx: usize,
-    size: usize,
+pub unsafe fn cuda_memcpy_peer_async<T>(
+    dst: *mut T, dst_device_idx: usize,
+    src: *const T, src_device_idx: usize,
+    len: usize,
     stream: &CudaStream) -> CudaResult<()>
+where T: Copy
 {
   match cudaMemcpyPeerAsync(
       dst as *mut c_void, dst_device_idx as c_int,
       src as *const c_void, src_device_idx as c_int,
-      size as size_t,
+      (len * size_of::<T>()) as size_t,
       stream.ptr)
   {
     cudaError_t::Success => Ok(()),
@@ -650,18 +649,11 @@ pub unsafe fn cuda_memcpy_2d(
     width: usize, height: usize,
     kind: CudaMemcpyKind) -> CudaResult<()>
 {
-  let kind = match kind {
-    CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
-    CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
-    CudaMemcpyKind::DeviceToHost    => cudaMemcpyKind::DeviceToHost,
-    CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
-    CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
-  };
   match cudaMemcpy2D(
       dst as *mut c_void, dst_pitch as size_t,
       src as *const c_void, src_pitch as size_t,
       width as size_t, height as size_t,
-      kind)
+      kind.to_ffi())
   {
     cudaError_t::Success => Ok(()),
     e => Err(CudaError(e)),
@@ -675,18 +667,11 @@ pub unsafe fn cuda_memcpy_2d_async(
     kind: CudaMemcpyKind,
     stream: &CudaStream) -> CudaResult<()>
 {
-  let kind = match kind {
-    CudaMemcpyKind::HostToHost      => cudaMemcpyKind::HostToHost,
-    CudaMemcpyKind::HostToDevice    => cudaMemcpyKind::HostToDevice,
-    CudaMemcpyKind::DeviceToHost    => cudaMemcpyKind::DeviceToHost,
-    CudaMemcpyKind::DeviceToDevice  => cudaMemcpyKind::DeviceToDevice,
-    CudaMemcpyKind::Unified         => cudaMemcpyKind::Default,
-  };
   match cudaMemcpy2DAsync(
       dst as *mut c_void, dst_pitch as size_t,
       src as *const c_void, src_pitch as size_t,
       width as size_t, height as size_t,
-      kind,
+      kind.to_ffi(),
       stream.ptr)
   {
     cudaError_t::Success => Ok(()),
