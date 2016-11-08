@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+//#![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
@@ -7,7 +7,7 @@ use libc::{
   c_void, c_char, c_int, c_uint, c_ulonglong, c_float, c_double, size_t,
 };
 
-pub const CUDART_VERSION: c_int = 6050;
+pub const CUDART_VERSION: c_int = 7050;
 
 #[repr(C)]
 pub struct dim3 {
@@ -628,7 +628,6 @@ pub struct textureReference {
 
 pub type cudaStreamCallback_t = extern "C" fn (cudaStream_t, cudaError_t, *mut c_void);
 
-//#[link(name = "cudart", kind = "dylib")]
 #[link(name = "cudart")]
 extern "C" {
   // Error Handling
