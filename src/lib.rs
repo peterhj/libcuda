@@ -1,5 +1,3 @@
-#![feature(arc_counts)]
-//#![feature(libc)]
 #![feature(optin_builtin_traits)]
 
 extern crate libc;
