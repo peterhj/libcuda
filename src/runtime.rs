@@ -255,6 +255,10 @@ impl CudaStream {
       e => Err(CudaError(e))
     }
   }
+
+  pub unsafe fn as_ptr(&self) -> cudaStream_t {
+    self.ptr
+  }
 }
 
 pub enum CudaEventStatus {
