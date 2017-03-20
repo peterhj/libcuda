@@ -3,7 +3,7 @@
 use ffi::runtime::*;
 
 use libc::{c_void, c_int, c_uint, size_t};
-use std::mem::{size_of, transmute};
+use std::mem::{size_of, transmute, zeroed};
 use std::ops::{Range};
 use std::ptr::{null_mut};
 
@@ -77,13 +77,6 @@ impl CudaDevice {
     Self::count().and_then(|count| Ok((0 .. count)))
   }
 
-  pub fn get_properties(&self) {
-    /*unsafe {
-      match cudaGetProperties(...) {
-      }
-    }*/
-  }
-
   pub fn get_current() -> CudaResult<usize> {
     let mut index: c_int = 0;
     match unsafe { cudaGetDevice(&mut index as *mut c_int) } {
@@ -115,9 +108,17 @@ impl CudaDevice {
     }
   }
 
-  pub fn get_attribute(device_idx: usize, ffi_attr: cudaDeviceAttr) -> CudaResult<i32> {
+  pub fn get_properties(device_idx: usize) -> CudaResult<cudaDeviceProp> {
+    let mut prop: cudaDeviceProp = unsafe { zeroed() };
+    match unsafe { cudaGetDeviceProperties(&mut prop as *mut _, device_idx as _) } {
+      cudaError_t::Success => Ok(prop),
+      e => Err(CudaError(e)),
+    }
+  }
+
+  pub fn get_attribute(device_idx: usize, attr: cudaDeviceAttr) -> CudaResult<i32> {
     let mut value: c_int = 0;
-    match unsafe { cudaDeviceGetAttribute(&mut value as *mut c_int, ffi_attr, device_idx as c_int) } {
+    match unsafe { cudaDeviceGetAttribute(&mut value as *mut c_int, attr, device_idx as c_int) } {
       cudaError_t::Success => Ok(value as i32),
       e => Err(CudaError(e)),
     }
@@ -303,6 +304,10 @@ impl CudaEvent {
         e => Err(CudaError(e)),
       }
     }
+  }
+
+  pub fn create_blocking() -> CudaResult<CudaEvent> {
+    Self::create_with_flags(0x01)
   }
 
   pub fn create_fastest() -> CudaResult<CudaEvent> {
