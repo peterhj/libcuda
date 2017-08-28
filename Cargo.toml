@@ -6,6 +6,11 @@ license = "BSD-2-Clause"
 description = "CUDA API bindings."
 repository = "https://github.com/peterhj/libcuda"
 keywords = ["cuda"]
+build = "build.rs"
+
+[build-dependencies]
+bindgen = "*"
+clang-sys = { version = "*", features = ["clang_4_0"] }
 
 [dependencies]
 libc = "^0.2"
