@@ -2,9 +2,9 @@
 
 use ffi::runtime::*;
 
-use libc::{c_void, c_int, c_uint, size_t};
 use std::mem::{size_of, transmute, zeroed};
 use std::ops::{Range};
+use std::os::raw::{c_void, c_int, c_uint};
 use std::ptr::{null_mut};
 
 #[repr(C)]
@@ -366,9 +366,9 @@ pub struct CudaMemInfo {
 
 pub fn cuda_get_mem_info() -> CudaResult<CudaMemInfo> {
   unsafe {
-    let mut free: size_t = 0;
-    let mut total: size_t = 0;
-    match cudaMemGetInfo(&mut free as *mut size_t, &mut total as *mut size_t) {
+    let mut free: usize = 0;
+    let mut total: usize = 0;
+    match cudaMemGetInfo(&mut free as *mut usize, &mut total as *mut usize) {
       cudaError_t::Success => Ok(CudaMemInfo{
         used: (total - free) as usize,
         free: free as usize,
@@ -381,7 +381,7 @@ pub fn cuda_get_mem_info() -> CudaResult<CudaMemInfo> {
 
 pub unsafe fn cuda_alloc_pinned(size: usize, flags: u32) -> CudaResult<*mut u8> {
   let mut ptr = 0 as *mut c_void;
-  match cudaHostAlloc(&mut ptr as *mut *mut c_void, size as size_t, flags) {
+  match cudaHostAlloc(&mut ptr as *mut *mut c_void, size as usize, flags) {
     cudaError_t::Success => Ok(ptr as *mut u8),
     e => Err(CudaError(e)),
   }
@@ -411,14 +411,14 @@ pub unsafe fn cuda_free_device<T>(dev_ptr: *mut T) -> CudaResult<()> where T: Co
 }
 
 pub unsafe fn cuda_memset(dev_ptr: *mut u8, value: i32, size: usize) -> CudaResult<()> {
-  match cudaMemset(dev_ptr as *mut c_void, value, size as size_t) {
+  match cudaMemset(dev_ptr as *mut c_void, value, size as usize) {
     cudaError_t::Success => Ok(()),
     e => Err(CudaError(e)),
   }
 }
 
 pub unsafe fn cuda_memset_async(dev_ptr: *mut u8, value: i32, size: usize, stream: &CudaStream) -> CudaResult<()> {
-  match cudaMemsetAsync(dev_ptr as *mut c_void, value, size as size_t, stream.ptr) {
+  match cudaMemsetAsync(dev_ptr as *mut c_void, value, size as usize, stream.ptr) {
     cudaError_t::Success => Ok(()),
     e => Err(CudaError(e)),
   }
@@ -455,7 +455,7 @@ where T: Copy
   match cudaMemcpy(
       dst as *mut c_void,
       src as *const c_void,
-      (len * size_of::<T>()) as size_t,
+      (len * size_of::<T>()) as usize,
       kind.to_ffi())
   {
     cudaError_t::Success => Ok(()),
@@ -474,7 +474,7 @@ where T: Copy
   match cudaMemcpyAsync(
       dst as *mut c_void,
       src as *const c_void,
-      (len * size_of::<T>()) as size_t,
+      (len * size_of::<T>()) as usize,
       kind.to_ffi(),
       stream.ptr)
   {
@@ -493,7 +493,7 @@ where T: Copy
   match cudaMemcpyPeerAsync(
       dst as *mut c_void, dst_device_idx as c_int,
       src as *const c_void, src_device_idx as c_int,
-      (len * size_of::<T>()) as size_t,
+      (len * size_of::<T>()) as usize,
       stream.ptr)
   {
     cudaError_t::Success => Ok(()),
@@ -508,9 +508,9 @@ pub unsafe fn cuda_memcpy_2d(
     kind: CudaMemcpyKind) -> CudaResult<()>
 {
   match cudaMemcpy2D(
-      dst as *mut c_void, dst_pitch as size_t,
-      src as *const c_void, src_pitch as size_t,
-      width as size_t, height as size_t,
+      dst as *mut c_void, dst_pitch as usize,
+      src as *const c_void, src_pitch as usize,
+      width as usize, height as usize,
       kind.to_ffi())
   {
     cudaError_t::Success => Ok(()),
@@ -526,9 +526,9 @@ pub unsafe fn cuda_memcpy_2d_async(
     stream: &CudaStream) -> CudaResult<()>
 {
   match cudaMemcpy2DAsync(
-      dst as *mut c_void, dst_pitch as size_t,
-      src as *const c_void, src_pitch as size_t,
-      width as size_t, height as size_t,
+      dst as *mut c_void, dst_pitch as usize,
+      src as *const c_void, src_pitch as usize,
+      width as usize, height as usize,
       kind.to_ffi(),
       stream.ptr)
   {

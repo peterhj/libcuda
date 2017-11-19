@@ -3,8 +3,8 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use libc::{
-  c_void, c_char, c_int, c_uint, c_ulonglong, c_float, c_double, size_t,
+use std::os::raw::{
+  c_void, c_char, c_int, c_uint, c_ulonglong, c_float, c_double,
 };
 
 pub const CUDART_VERSION: c_int = 7050;
@@ -154,20 +154,20 @@ pub enum cudaComputeMode {
 #[repr(C)]
 pub struct cudaDeviceProp {
   pub name: [c_char; 256],
-  pub total_global_mem:     size_t,
-  pub shared_mem_per_block: size_t,
+  pub total_global_mem:     usize,
+  pub shared_mem_per_block: usize,
   pub regs_per_block:       c_int,
   pub warp_size:            c_int,
-  pub mem_pitch:            size_t,
+  pub mem_pitch:            usize,
   pub max_threads_per_block:    c_int,
   pub max_threads_dim:      [c_int; 3],
   pub max_grid_size:        [c_int; 3],
   pub clock_rate:           c_int,
-  pub total_const_mem:      size_t,
+  pub total_const_mem:      usize,
   pub major:    c_int,
   pub minor:    c_int,
-  pub texture_alignment:    size_t,
-  pub texture_pitch_alignment:  size_t,
+  pub texture_alignment:    usize,
+  pub texture_pitch_alignment:  usize,
   pub device_overlap:       c_int,
   pub multiprocessor_count: c_int,
   pub kernel_exec_timeout_enabled:  c_int,
@@ -194,7 +194,7 @@ pub struct cudaDeviceProp {
   pub max_surface_2d_layered:   [c_int; 3],
   pub max_surface_cubemap:      c_int,
   pub max_surface_cubemap_layered:  [c_int; 2],
-  pub surface_alignment:        size_t,
+  pub surface_alignment:        usize,
   pub concurrent_kernels:       c_int,
   pub ecc_enabled:      c_int,
   pub pci_bus_id:       c_int,
@@ -210,7 +210,7 @@ pub struct cudaDeviceProp {
   pub stream_priorities_supported:      c_int,
   pub global_l1_cache_supported:        c_int,
   pub local_l1_cache_supported:         c_int,
-  pub shared_mem_per_multiprocessor:    size_t,
+  pub shared_mem_per_multiprocessor:    usize,
   pub regs_per_multiprocessor:          c_int,
   pub managed_memory:                   c_int,
   pub is_multi_gpu_board:       c_int,
@@ -220,20 +220,20 @@ pub struct cudaDeviceProp {
 /*#[repr(C)]
 pub struct cudaDeviceProp {
   name: [c_char; 256],
-  totalGlobalMem: size_t,
-  sharedMemPerBlock: size_t,
+  totalGlobalMem: usize,
+  sharedMemPerBlock: usize,
   regsPerBlock: c_int,
   warpSize: c_int,
-  memPitch: size_t,
+  memPitch: usize,
   maxThreadsPerBlock: c_int,
   maxThreadsDim: [c_int; 3],
   maxGridSize: [c_int; 3],
   clockRate: c_int,
-  totalConstMem: size_t,
+  totalConstMem: usize,
   major: c_int,
   minor: c_int,
-  textureAlignment: size_t,
-  texturePitchAlignment: size_t,
+  textureAlignment: usize,
+  texturePitchAlignment: usize,
   deviceOverlap: c_int,
   multiProcessorCount: c_int,
   kernelExecTimeoutEnabled: c_int,
@@ -260,7 +260,7 @@ pub struct cudaDeviceProp {
   maxSurface2DLayered: [c_int; 3],
   maxSurfaceCubemap: c_int,
   maxSurfaceCubemapLayered: [c_int; 2],
-  surfaceAlignment: size_t,
+  surfaceAlignment: usize,
   concurrentKernels: c_int,
   ECCEnabled: c_int,
   pciBusID: c_int,
@@ -276,7 +276,7 @@ pub struct cudaDeviceProp {
   streamPrioritiesSupported: c_int,
   globalL1CacheSupported: c_int,
   localL1CacheSupported: c_int,
-  sharedMemPerMultiprocessor: size_t,
+  sharedMemPerMultiprocessor: usize,
   regsPerMultiprocessor: c_int,
   managedMemory: c_int,
   isMultiGpuBoard: c_int,
@@ -550,16 +550,16 @@ pub struct cudaChannelFormatDesc {
 
 #[repr(C)]
 pub struct cudaExtent {
-  width: size_t,
-  height: size_t,
-  depth: size_t,
+  width: usize,
+  height: usize,
+  depth: usize,
 }
 
 #[repr(C)]
 pub struct cudaFuncAttributes {
-  sharedSizeBytes: size_t,
-  constSizeBytes: size_t,
-  localSizeBytes: size_t,
+  sharedSizeBytes: usize,
+  constSizeBytes: usize,
+  localSizeBytes: usize,
   maxThreadsPerBlock: c_int,
   numRegs: c_int,
   ptxVersion: c_int,
@@ -607,9 +607,9 @@ pub struct cudaMemcpy3DPeerParms {
 #[repr(C)]
 pub struct cudaPitchedPtr {
   ptr: *mut c_void,
-  pitch: size_t,
-  xsize: size_t,
-  ysize: size_t,
+  pitch: usize,
+  xsize: usize,
+  ysize: usize,
 }
 
 #[repr(C)]
@@ -623,18 +623,18 @@ pub struct cudaPointerAttributes {
 
 #[repr(C)]
 pub struct cudaPos {
-  x: size_t,
-  y: size_t,
-  z: size_t,
+  x: usize,
+  y: usize,
+  z: usize,
 }
 
 #[repr(C)]
 pub struct cudaResourceDescUnion {
   devPtr: *mut c_void,
   desc: cudaChannelFormatDesc,
-  width: size_t,
-  height: size_t,
-  pitchInBytes: size_t,
+  width: usize,
+  height: usize,
+  pitchInBytes: usize,
 }
 
 #[repr(C)]
@@ -649,9 +649,9 @@ pub struct cudaResourceDesc {
 #[repr(C)]
 pub struct cudaResourceViewDesc {
   format: cudaResourceViewFormat,
-  width: size_t,
-  height: size_t,
-  depth: size_t,
+  width: usize,
+  height: usize,
+  depth: usize,
   firstMipmapLevel: c_uint,
   lastMipmapLevel: c_uint,
   firstLayer: c_uint,
@@ -711,13 +711,13 @@ extern "C" {
   pub fn cudaDeviceGetAttribute(value: *mut c_int, attr: cudaDeviceAttr, device: c_int) -> cudaError_t;
   pub fn cudaDeviceGetByPCIBusId(device: *mut c_int, pciBusId: *const c_char) -> cudaError_t;
   pub fn cudaDeviceGetCacheConfig(pCacheConfig: *mut *mut cudaFuncCache) -> cudaError_t;
-  pub fn cudaDeviceGetLimit(pValue: *mut size_t, limit: cudaLimit) -> cudaError_t;
+  pub fn cudaDeviceGetLimit(pValue: *mut usize, limit: cudaLimit) -> cudaError_t;
   pub fn cudaDeviceGetPCIBusId(pciBusId: *mut c_char, len: c_int, device: c_int) -> cudaError_t;
   pub fn cudaDeviceGetSharedMemConfig(pConfig: *mut *mut cudaSharedMemConfig) -> cudaError_t;
   pub fn cudaDeviceGetStreamPriorityRange(leastPriority: *mut c_int, greatestPriority: *mut c_int) -> cudaError_t;
   pub fn cudaDeviceReset() -> cudaError_t;
   pub fn cudaDeviceSetCacheConfig(cacheConfig: cudaFuncCache) -> cudaError_t;
-  pub fn cudaDeviceSetLimit(limit: cudaLimit, value: size_t) -> cudaError_t;
+  pub fn cudaDeviceSetLimit(limit: cudaLimit, value: usize) -> cudaError_t;
   pub fn cudaDeviceSetSharedMemConfig(config: cudaSharedMemConfig) -> cudaError_t;
   pub fn cudaDeviceSynchronize() -> cudaError_t;
   pub fn cudaGetDevice(device: *mut c_int) -> cudaError_t;
@@ -734,7 +734,7 @@ extern "C" {
 
   // Stream Management
   pub fn cudaStreamAddCallback(stream: cudaStream_t, callback: cudaStreamCallback_t, userdata: *mut c_void, flags: c_uint) -> cudaError_t;
-  pub fn cudaStreamAttachMemAsync(stream: cudaStream_t, devPtr: *mut c_void, length: size_t, flags: c_uint) -> cudaError_t;
+  pub fn cudaStreamAttachMemAsync(stream: cudaStream_t, devPtr: *mut c_void, length: usize, flags: c_uint) -> cudaError_t;
   pub fn cudaStreamCreate(pStream: *mut cudaStream_t) -> cudaError_t;
   pub fn cudaStreamCreateWithFlags(pStream: *mut cudaStream_t, flags: c_uint) -> cudaError_t;
   pub fn cudaStreamCreateWithPriority(pStream: *mut cudaStream_t, flags: c_uint, priority: c_int) -> cudaError_t;
@@ -755,14 +755,14 @@ extern "C" {
   pub fn cudaEventSynchronize(event: cudaEvent_t) -> cudaError_t;
 
   // Execution Control
-  pub fn cudaConfigureCall(gridDim: dim3, blockDim: dim3, sharedMem: size_t, stream: cudaStream_t) -> cudaError_t;
+  pub fn cudaConfigureCall(gridDim: dim3, blockDim: dim3, sharedMem: usize, stream: cudaStream_t) -> cudaError_t;
   pub fn cudaFuncGetAttributes(attr: *mut cudaFuncAttributes, func: *const c_void) -> cudaError_t;
   pub fn cudaFuncSetCacheConfig(func: *const c_void, cacheConfig: cudaFuncCache) -> cudaError_t;
   pub fn cudaFuncSetSharedMemConfig(func: *const c_void, config: cudaSharedMemConfig) -> cudaError_t;
   pub fn cudaLaunch(func: *const c_void) -> cudaError_t;
   pub fn cudaSetDoubleForDevice(d: *mut c_double) -> cudaError_t;
   pub fn cudaSetDoubleForHost(d: *mut c_double) -> cudaError_t;
-  pub fn cudaSetupArgument(arg: *const c_void, size: size_t, offset: size_t) -> cudaError_t;
+  pub fn cudaSetupArgument(arg: *const c_void, size: usize, offset: usize) -> cudaError_t;
 
   // Occupancy
   // ...
@@ -775,38 +775,38 @@ extern "C" {
   pub fn cudaFreeMipmappedArray(mipmappedArray: cudaMipmappedArray_t) -> cudaError_t;
   pub fn cudaGetMipmappedArrayLevel(levelArray: *mut cudaArray_t, mipmappedArray: cudaMipmappedArray_const_t, level: c_uint) -> cudaError_t;
   pub fn cudaGetSymbolAddress(devPtr: *mut *mut c_void, symbol: *const c_void) -> cudaError_t;
-  pub fn cudaGetSymbolSize(size: *mut size_t, symbol: *const c_void) -> cudaError_t;
-  pub fn cudaHostAlloc(pHost: *mut *mut c_void, size: size_t, flags: c_uint) -> cudaError_t;
+  pub fn cudaGetSymbolSize(size: *mut usize, symbol: *const c_void) -> cudaError_t;
+  pub fn cudaHostAlloc(pHost: *mut *mut c_void, size: usize, flags: c_uint) -> cudaError_t;
   pub fn cudaHostGetDevicePointer(pDevice: *mut *mut c_void, pHost: *mut c_void, flags: c_uint) -> cudaError_t;
   pub fn cudaHostGetFlags(pFlags: *mut c_uint, pHost: *mut c_void) -> cudaError_t;
-  pub fn cudaHostRegister(ptr: *mut c_void, size: size_t, flags: c_uint) -> cudaError_t;
+  pub fn cudaHostRegister(ptr: *mut c_void, size: usize, flags: c_uint) -> cudaError_t;
   pub fn cudaHostUnregister(ptr: *mut c_void) -> cudaError_t;
-  pub fn cudaMalloc(devPtr: *mut *mut c_void, size: size_t) -> cudaError_t;
+  pub fn cudaMalloc(devPtr: *mut *mut c_void, size: usize) -> cudaError_t;
   pub fn cudaMalloc3D(pitchedDevPtr: *mut cudaPitchedPtr, extent: cudaExtent) -> cudaError_t;
   pub fn cudaMalloc3DArray(array: *mut cudaArray_t, desc: *const cudaChannelFormatDesc, extent: cudaExtent, flags: c_uint) -> cudaError_t;
-  pub fn cudaMallocArray(array: *mut cudaArray_t, desc: *const cudaChannelFormatDesc, width: size_t, height: size_t, flags: c_uint) -> cudaError_t;
-  pub fn cudaMallocHost(ptr: *mut *mut c_void, size: size_t) -> cudaError_t;
-  pub fn cudaMallocManaged(devPtr: *mut *mut c_void, size: size_t, flags: c_uint) -> cudaError_t;
+  pub fn cudaMallocArray(array: *mut cudaArray_t, desc: *const cudaChannelFormatDesc, width: usize, height: usize, flags: c_uint) -> cudaError_t;
+  pub fn cudaMallocHost(ptr: *mut *mut c_void, size: usize) -> cudaError_t;
+  pub fn cudaMallocManaged(devPtr: *mut *mut c_void, size: usize, flags: c_uint) -> cudaError_t;
   pub fn cudaMallocMipmappedArray(mipmappedArray: *mut cudaMipmappedArray_t, desc: *const cudaChannelFormatDesc, extent: cudaExtent, numLevels: c_uint, flags: c_uint) -> cudaError_t;
-  pub fn cudaMallocPitch(devPtr: *mut *mut c_void, pitch: *mut size_t, width: size_t, height: size_t) -> cudaError_t;
-  pub fn cudaMemGetInfo(free: *mut size_t, total: *mut size_t) -> cudaError_t;
-  pub fn cudaMemcpy(dst: *mut c_void, src: *const c_void, count: size_t, kind: cudaMemcpyKind) -> cudaError_t;
-  pub fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: size_t, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
+  pub fn cudaMallocPitch(devPtr: *mut *mut c_void, pitch: *mut usize, width: usize, height: usize) -> cudaError_t;
+  pub fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> cudaError_t;
+  pub fn cudaMemcpy(dst: *mut c_void, src: *const c_void, count: usize, kind: cudaMemcpyKind) -> cudaError_t;
+  pub fn cudaMemcpyAsync(dst: *mut c_void, src: *const c_void, count: usize, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
   // ...
-  pub fn cudaMemcpy2D(dst: *mut c_void, dpitch: size_t, src: *const c_void, spitch: size_t, width: size_t, height: size_t, kind: cudaMemcpyKind) -> cudaError_t;
-  pub fn cudaMemcpy2DAsync(dst: *mut c_void, dpitch: size_t, src: *const c_void, spitch: size_t, width: size_t, height: size_t, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
+  pub fn cudaMemcpy2D(dst: *mut c_void, dpitch: usize, src: *const c_void, spitch: usize, width: usize, height: usize, kind: cudaMemcpyKind) -> cudaError_t;
+  pub fn cudaMemcpy2DAsync(dst: *mut c_void, dpitch: usize, src: *const c_void, spitch: usize, width: usize, height: usize, kind: cudaMemcpyKind, stream: cudaStream_t) -> cudaError_t;
   // ...
   //pub fn cudaMemcpy3D() -> cudaError_t;
   // ...
-  pub fn cudaMemcpyPeer(dst: *mut c_void, dstDevice: c_int, src: *const c_void, srcDevice: c_int, count: size_t) -> cudaError_t;
-  pub fn cudaMemcpyPeerAsync(dst: *mut c_void, dstDevice: c_int, src: *const c_void, srcDevice: c_int, count: size_t, stream: cudaStream_t) -> cudaError_t;
+  pub fn cudaMemcpyPeer(dst: *mut c_void, dstDevice: c_int, src: *const c_void, srcDevice: c_int, count: usize) -> cudaError_t;
+  pub fn cudaMemcpyPeerAsync(dst: *mut c_void, dstDevice: c_int, src: *const c_void, srcDevice: c_int, count: usize, stream: cudaStream_t) -> cudaError_t;
   // ...
-  pub fn cudaMemset(devPtr: *mut c_void, value: c_int, count: size_t) -> cudaError_t;
+  pub fn cudaMemset(devPtr: *mut c_void, value: c_int, count: usize) -> cudaError_t;
   // ...
-  pub fn cudaMemsetAsync(devPtr: *mut c_void, value: c_int, count: size_t, stream: cudaStream_t) -> cudaError_t;
-  pub fn make_cudaExtent(w: size_t, h: size_t, d: size_t) -> cudaExtent;
-  pub fn make_cudaPitchedPtr(d: *mut c_void, p: size_t, xsz: size_t, ysz: size_t) -> cudaPitchedPtr;
-  pub fn make_cudaPos(x: size_t, y: size_t, z: size_t) -> cudaPos;
+  pub fn cudaMemsetAsync(devPtr: *mut c_void, value: c_int, count: usize, stream: cudaStream_t) -> cudaError_t;
+  pub fn make_cudaExtent(w: usize, h: usize, d: usize) -> cudaExtent;
+  pub fn make_cudaPitchedPtr(d: *mut c_void, p: usize, xsz: usize, ysz: usize) -> cudaPitchedPtr;
+  pub fn make_cudaPos(x: usize, y: usize, z: usize) -> cudaPos;
 
   // Unified Addressing
   // ...

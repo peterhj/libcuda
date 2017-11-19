@@ -1,6 +1,6 @@
 [package]
 name = "cuda"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Peter Jin <peterhaijin@gmail.com>"]
 license = "BSD-2-Clause"
 description = "CUDA API bindings."
@@ -10,10 +10,6 @@ build = "build.rs"
 
 [build-dependencies]
 bindgen = "*"
-clang-sys = { version = "*", features = ["clang_4_0"] }
-
-[dependencies]
-libc = "^0.2"
 
 [lib]
 name = "cuda"

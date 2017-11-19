@@ -7,7 +7,7 @@ fn main() {
   //println!("cargo:rustc-link-lib=cudart");
   let cuda_bindings = bindgen::Builder::default()
     //.header("wrap_cuda.h")
-    .header("/usr/local/cuda-7.5/include/cuda_runtime.h")
+    .header("/usr/local/cuda/include/cuda_runtime.h")
     .link("cudart")
     // Device management.
     .whitelisted_type("cudaDeviceProp")

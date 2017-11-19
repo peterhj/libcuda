@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
 
-use libc::{c_float, c_double};
+use std::os::raw::{c_float, c_double};
 
 #[derive(Clone, Copy)]
 #[repr(C)]
