@@ -1,14 +1,15 @@
 [package]
 name = "cuda"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Peter Jin <peterhaijin@gmail.com>"]
 license = "BSD-2-Clause"
 description = "CUDA API bindings."
 repository = "https://github.com/peterhj/libcuda"
 keywords = ["cuda"]
+build = "build.rs"
 
-[dependencies]
-libc = "^0.2"
+[build-dependencies]
+bindgen = "*"
 
 [lib]
 name = "cuda"
