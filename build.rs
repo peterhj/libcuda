@@ -4,11 +4,11 @@ use std::env;
 use std::path::{PathBuf};
 
 fn main() {
-  //println!("cargo:rustc-link-lib=cudart");
+  println!("cargo:rustc-link-lib=cudart");
   let cuda_bindings = bindgen::Builder::default()
     //.header("wrap_cuda.h")
     .header("/usr/local/cuda/include/cuda_runtime.h")
-    .link("cudart")
+    //.link("cudart")
     // Device management.
     .whitelist_type("cudaDeviceProp")
     .whitelist_function("cudaDeviceReset")
@@ -23,6 +23,7 @@ fn main() {
     // Error handling.
     .whitelist_type("cudaError_t")
     // Stream management.
+    .whitelist_type("CUstream_st")
     .whitelist_type("cudaStream_t")
     .whitelist_function("cudaStreamCreate")
     .whitelist_function("cudaStreamCreateWithFlags")

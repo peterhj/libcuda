@@ -22,7 +22,7 @@ impl CudaDevice {
     let mut count: c_int = 0;
     unsafe {
       match cudaGetDeviceCount(&mut count as *mut c_int) {
-        cudaError_t_cudaSuccess => Ok(count as usize),
+        cudaError_cudaSuccess => Ok(count as usize),
         e => Err(CudaError(e)),
       }
     }
@@ -31,7 +31,7 @@ impl CudaDevice {
   pub fn get_current() -> CudaResult<i32> {
     let mut index: c_int = 0;
     match unsafe { cudaGetDevice(&mut index as *mut c_int) } {
-      cudaError_t_cudaSuccess => Ok(index),
+      cudaError_cudaSuccess => Ok(index),
       e => Err(CudaError(e)),
     }
   }
@@ -39,7 +39,7 @@ impl CudaDevice {
   pub fn set_current(index: i32) -> CudaResult<()> {
     unsafe {
       match cudaSetDevice(index as c_int) {
-        cudaError_t_cudaSuccess => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -47,14 +47,14 @@ impl CudaDevice {
 
   pub fn reset() -> CudaResult<()> {
     match unsafe { cudaDeviceReset() } {
-      cudaError_t_cudaSuccess => Ok(()),
+      cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e)),
     }
   }
 
   pub fn set_flags(flags: u32) -> CudaResult<()> {
     match unsafe { cudaSetDeviceFlags(flags as c_uint) } {
-      cudaError_t_cudaSuccess => Ok(()),
+      cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e)),
     }
   }
@@ -62,7 +62,7 @@ impl CudaDevice {
   pub fn get_properties(device_idx: usize) -> CudaResult<cudaDeviceProp> {
     let mut prop: cudaDeviceProp = unsafe { zeroed() };
     match unsafe { cudaGetDeviceProperties(&mut prop as *mut _, device_idx as _) } {
-      cudaError_t_cudaSuccess => Ok(prop),
+      cudaError_cudaSuccess => Ok(prop),
       e => Err(CudaError(e)),
     }
   }
@@ -70,7 +70,7 @@ impl CudaDevice {
   pub fn get_attribute(device_idx: usize, attr: cudaDeviceAttr) -> CudaResult<i32> {
     let mut value: c_int = 0;
     match unsafe { cudaDeviceGetAttribute(&mut value as *mut c_int, attr, device_idx as c_int) } {
-      cudaError_t_cudaSuccess => Ok(value as i32),
+      cudaError_cudaSuccess => Ok(value as i32),
       e => Err(CudaError(e)),
     }
   }
@@ -79,7 +79,7 @@ impl CudaDevice {
     unsafe {
       let mut access: c_int = 0;
       match cudaDeviceCanAccessPeer(&mut access as *mut c_int, idx as c_int, peer_idx as c_int) {
-        cudaError_t_cudaSuccess => Ok(access != 0),
+        cudaError_cudaSuccess => Ok(access != 0),
         e => Err(CudaError(e)),
       }
     }
@@ -88,8 +88,8 @@ impl CudaDevice {
   pub fn enable_peer_access(peer_idx: usize) -> CudaResult<()> {
     unsafe {
       match cudaDeviceEnablePeerAccess(peer_idx as c_int, 0) {
-        cudaError_t_cudaSuccess => Ok(()),
-        cudaError_t_cudaErrorPeerAccessAlreadyEnabled => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
+        cudaError_cudaErrorPeerAccessAlreadyEnabled => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -98,8 +98,8 @@ impl CudaDevice {
   pub fn disable_peer_access(peer_idx: usize) -> CudaResult<()> {
     unsafe {
       match cudaDeviceDisablePeerAccess(peer_idx as c_int) {
-        cudaError_t_cudaSuccess => Ok(()),
-        cudaError_t_cudaErrorPeerAccessNotEnabled => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
+        cudaError_cudaErrorPeerAccessNotEnabled => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -118,8 +118,8 @@ impl Drop for CudaStream {
     if !self.ptr.is_null() {
       unsafe {
         match cudaStreamDestroy(self.ptr) {
-          cudaError_t_cudaSuccess => {}
-          cudaError_t_cudaErrorCudartUnloading => {
+          cudaError_cudaSuccess => {}
+          cudaError_cudaErrorCudartUnloading => {
             // XXX(20160308): Sometimes drop() is called while the global runtime
             // is shutting down; suppress these errors.
           }
@@ -142,7 +142,7 @@ impl CudaStream {
     unsafe {
       let mut ptr: cudaStream_t = null_mut();
       match cudaStreamCreate(&mut ptr as *mut cudaStream_t) {
-        cudaError_t_cudaSuccess => {
+        cudaError_cudaSuccess => {
           Ok(CudaStream{
             ptr: ptr,
           })
@@ -155,7 +155,7 @@ impl CudaStream {
   pub fn add_callback(&self, callback: extern "C" fn (stream: cudaStream_t, status: cudaError_t, user_data: *mut c_void), user_data: *mut c_void) -> CudaResult<()> {
     unsafe {
       match cudaStreamAddCallback(self.ptr, Some(callback), user_data, 0) {
-        cudaError_t_cudaSuccess => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -164,7 +164,7 @@ impl CudaStream {
   pub fn synchronize(&self) -> CudaResult<()> {
     unsafe {
       match cudaStreamSynchronize(self.ptr) {
-        cudaError_t_cudaSuccess => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -172,7 +172,7 @@ impl CudaStream {
 
   pub fn wait_event(&self, event: &CudaEvent) -> CudaResult<()> {
     match unsafe { cudaStreamWaitEvent(self.ptr, event.as_ptr(), 0) } {
-      cudaError_t_cudaSuccess => Ok(()),
+      cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e))
     }
   }
@@ -199,8 +199,8 @@ impl Drop for CudaEvent {
     if !self.ptr.is_null() {
       unsafe {
         match cudaEventDestroy(self.ptr) {
-          cudaError_t_cudaSuccess => {}
-          cudaError_t_cudaErrorCudartUnloading => {
+          cudaError_cudaSuccess => {}
+          cudaError_cudaErrorCudartUnloading => {
             // XXX(20160308): Sometimes drop() is called while the global runtime
             // is shutting down; suppress these errors.
           }
@@ -216,7 +216,7 @@ impl CudaEvent {
     unsafe {
       let mut ptr = 0 as cudaEvent_t;
       match cudaEventCreate(&mut ptr as *mut cudaEvent_t) {
-        cudaError_t_cudaSuccess => {
+        cudaError_cudaSuccess => {
           Ok(CudaEvent{
             ptr: ptr,
           })
@@ -238,7 +238,7 @@ impl CudaEvent {
     unsafe {
       let mut ptr = 0 as cudaEvent_t;
       match cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags as c_uint) {
-        cudaError_t_cudaSuccess => {
+        cudaError_cudaSuccess => {
           Ok(CudaEvent{
             ptr: ptr,
           })
@@ -250,9 +250,9 @@ impl CudaEvent {
 
   pub fn query(&self) -> CudaResult<CudaEventStatus> {
     match unsafe { cudaEventQuery(self.ptr) } {
-      cudaError_t_cudaSuccess => Ok(CudaEventStatus::Complete),
+      cudaError_cudaSuccess => Ok(CudaEventStatus::Complete),
       e => match e {
-        cudaError_t_cudaErrorNotReady => Ok(CudaEventStatus::NotReady),
+        cudaError_cudaErrorNotReady => Ok(CudaEventStatus::NotReady),
         e => Err(CudaError(e)),
       },
     }
@@ -261,7 +261,7 @@ impl CudaEvent {
   pub fn record(&self, stream: &CudaStream) -> CudaResult<()> {
     unsafe {
       match cudaEventRecord(self.ptr, stream.as_ptr()) {
-        cudaError_t_cudaSuccess => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -270,7 +270,7 @@ impl CudaEvent {
   pub fn synchronize(&self) -> CudaResult<()> {
     unsafe {
       match cudaEventSynchronize(self.ptr) {
-        cudaError_t_cudaSuccess => Ok(()),
+        cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
     }
@@ -285,28 +285,28 @@ pub unsafe fn cuda_alloc_device<T>(len: usize) -> CudaResult<*mut T> where T: Co
   let mut dptr: *mut c_void = null_mut();
   let size = len * size_of::<T>();
   match cudaMalloc(&mut dptr as *mut *mut c_void, size) {
-    cudaError_t_cudaSuccess => Ok(dptr as *mut T),
+    cudaError_cudaSuccess => Ok(dptr as *mut T),
     e => Err(CudaError(e)),
   }
 }
 
 pub unsafe fn cuda_free_device<T>(dptr: *mut T) -> CudaResult<()> where T: Copy {
   match cudaFree(dptr as *mut c_void) {
-    cudaError_t_cudaSuccess => Ok(()),
+    cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
 }
 
 pub unsafe fn cuda_memset(dptr: *mut u8, value: i32, size: usize) -> CudaResult<()> {
   match cudaMemset(dptr as *mut c_void, value, size) {
-    cudaError_t_cudaSuccess => Ok(()),
+    cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
 }
 
 pub unsafe fn cuda_memset_async(dptr: *mut u8, value: i32, size: usize, stream: &CudaStream) -> CudaResult<()> {
   match cudaMemsetAsync(dptr as *mut c_void, value, size, stream.as_ptr()) {
-    cudaError_t_cudaSuccess => Ok(()),
+    cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
 }
@@ -345,7 +345,7 @@ where T: Copy
       len * size_of::<T>(),
       kind.to_bind_type())
   {
-    cudaError_t_cudaSuccess => Ok(()),
+    cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
 }
@@ -365,7 +365,7 @@ where T: Copy
       kind.to_bind_type(),
       stream.as_ptr())
   {
-    cudaError_t_cudaSuccess => Ok(()),
+    cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
 }
@@ -387,7 +387,7 @@ where T: Copy
       len * size_of::<T>(),
       stream.as_ptr())
   {
-    cudaError_t_cudaSuccess => Ok(()),
+    cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
 }
