@@ -52,6 +52,13 @@ impl CudaDevice {
     }
   }
 
+  pub fn synchronize() -> CudaResult<()> {
+    match unsafe { cudaDeviceSynchronize() } {
+      cudaError_cudaSuccess => Ok(()),
+      e => Err(CudaError(e)),
+    }
+  }
+
   pub fn set_flags(flags: u32) -> CudaResult<()> {
     match unsafe { cudaSetDeviceFlags(flags as c_uint) } {
       cudaError_cudaSuccess => Ok(()),
