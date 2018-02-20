@@ -29,6 +29,7 @@ fn main() {
     .whitelist_function("cudaSetDeviceFlags")
     // Error handling.
     .whitelist_type("cudaError_t")
+    .whitelist_function("cudaGetErrorString")
     // Stream management.
     .whitelist_type("CUstream_st")
     .whitelist_type("cudaStream_t")

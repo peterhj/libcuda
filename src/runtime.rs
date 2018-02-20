@@ -1,5 +1,6 @@
 use ffi::runtime::*;
 
+use std::ffi::{CStr};
 use std::mem::{size_of, zeroed};
 use std::os::raw::{c_void, c_int, c_uint};
 use std::ptr::{null_mut};
@@ -12,7 +13,21 @@ impl CudaError {
     let &CudaError(e) = self;
     e as _
   }
+
+  pub fn get_string(&self) -> String {
+    let raw_s = unsafe { cudaGetErrorString(self.0) };
+    if raw_s.is_null() {
+      return format!("(null)");
+    }
+    let cs = unsafe { CStr::from_ptr(raw_s) };
+    let s = match cs.to_str() {
+      Err(_) => "(invalid utf8)",
+      Ok(s) => s,
+    };
+    s.to_owned()
+  }
 }
+
 pub type CudaResult<T> = Result<T, CudaError>;
 
 pub struct CudaDevice;
