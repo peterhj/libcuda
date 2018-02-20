@@ -174,7 +174,7 @@ impl CudaStream {
     }
   }
 
-  pub unsafe fn as_ptr(&mut self) -> cudaStream_t {
+  pub unsafe fn as_mut_ptr(&mut self) -> cudaStream_t {
     self.ptr
   }
 
@@ -282,7 +282,7 @@ impl CudaEvent {
 
   pub fn record(&self, stream: &mut CudaStream) -> CudaResult<()> {
     unsafe {
-      match cudaEventRecord(self.ptr, stream.as_ptr()) {
+      match cudaEventRecord(self.ptr, stream.as_mut_ptr()) {
         cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
@@ -327,7 +327,7 @@ pub unsafe fn cuda_memset(dptr: *mut u8, value: i32, size: usize) -> CudaResult<
 }
 
 pub unsafe fn cuda_memset_async(dptr: *mut u8, value: i32, size: usize, stream: &mut CudaStream) -> CudaResult<()> {
-  match cudaMemsetAsync(dptr as *mut c_void, value, size, stream.as_ptr()) {
+  match cudaMemsetAsync(dptr as *mut c_void, value, size, stream.as_mut_ptr()) {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
@@ -385,7 +385,7 @@ where T: Copy
       src as *const c_void,
       len * size_of::<T>(),
       kind.to_bind_type(),
-      stream.as_ptr())
+      stream.as_mut_ptr())
   {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
@@ -407,7 +407,7 @@ where T: Copy
       src as *const c_void,
       src_device_idx as c_int,
       len * size_of::<T>(),
-      stream.as_ptr())
+      stream.as_mut_ptr())
   {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
