@@ -4,10 +4,17 @@ use std::env;
 use std::path::{PathBuf};
 
 fn main() {
+  let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+  let cuda_dir = PathBuf::from(match env::var("CUDA_HOME") {
+    Ok(path) => path,
+    Err(_) => "/usr/local/cuda".to_owned(),
+  });
+
   println!("cargo:rustc-link-lib=cudart");
+
   let cuda_bindings = bindgen::Builder::default()
-    //.header("wrap_cuda.h")
-    .header("/usr/local/cuda/include/cuda_runtime.h")
+    .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
+    .header("wrap.h")
     //.link("cudart")
     // Device management.
     .whitelist_type("cudaDeviceProp")
@@ -67,7 +74,6 @@ fn main() {
     .whitelist_function("cudaDeviceEnablePeerAccess")
     .generate()
     .expect("bindgen failed to generate cuda bindings");
-  let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
   cuda_bindings
     .write_to_file(out_dir.join("cuda_bind.rs"))
     .expect("bindgen failed to write cuda bindings");

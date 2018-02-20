@@ -159,7 +159,11 @@ impl CudaStream {
     }
   }
 
-  pub fn add_callback(&self, callback: extern "C" fn (stream: cudaStream_t, status: cudaError_t, user_data: *mut c_void), user_data: *mut c_void) -> CudaResult<()> {
+  pub unsafe fn as_ptr(&mut self) -> cudaStream_t {
+    self.ptr
+  }
+
+  pub fn add_callback(&mut self, callback: extern "C" fn (stream: cudaStream_t, status: cudaError_t, user_data: *mut c_void), user_data: *mut c_void) -> CudaResult<()> {
     unsafe {
       match cudaStreamAddCallback(self.ptr, Some(callback), user_data, 0) {
         cudaError_cudaSuccess => Ok(()),
@@ -168,7 +172,7 @@ impl CudaStream {
     }
   }
 
-  pub fn synchronize(&self) -> CudaResult<()> {
+  pub fn synchronize(&mut self) -> CudaResult<()> {
     unsafe {
       match cudaStreamSynchronize(self.ptr) {
         cudaError_cudaSuccess => Ok(()),
@@ -177,15 +181,11 @@ impl CudaStream {
     }
   }
 
-  pub fn wait_event(&self, event: &CudaEvent) -> CudaResult<()> {
+  pub fn wait_event(&mut self, event: &CudaEvent) -> CudaResult<()> {
     match unsafe { cudaStreamWaitEvent(self.ptr, event.as_ptr(), 0) } {
       cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e))
     }
-  }
-
-  pub unsafe fn as_ptr(&self) -> cudaStream_t {
-    self.ptr
   }
 }
 
@@ -265,7 +265,7 @@ impl CudaEvent {
     }
   }
 
-  pub fn record(&self, stream: &CudaStream) -> CudaResult<()> {
+  pub fn record(&self, stream: &mut CudaStream) -> CudaResult<()> {
     unsafe {
       match cudaEventRecord(self.ptr, stream.as_ptr()) {
         cudaError_cudaSuccess => Ok(()),
@@ -311,7 +311,7 @@ pub unsafe fn cuda_memset(dptr: *mut u8, value: i32, size: usize) -> CudaResult<
   }
 }
 
-pub unsafe fn cuda_memset_async(dptr: *mut u8, value: i32, size: usize, stream: &CudaStream) -> CudaResult<()> {
+pub unsafe fn cuda_memset_async(dptr: *mut u8, value: i32, size: usize, stream: &mut CudaStream) -> CudaResult<()> {
   match cudaMemsetAsync(dptr as *mut c_void, value, size, stream.as_ptr()) {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
@@ -362,7 +362,7 @@ pub unsafe fn cuda_memcpy_async<T>(
     src: *const T,
     len: usize,
     kind: CudaMemcpyKind,
-    stream: &CudaStream) -> CudaResult<()>
+    stream: &mut CudaStream) -> CudaResult<()>
 where T: Copy
 {
   match cudaMemcpyAsync(
@@ -383,7 +383,7 @@ pub unsafe fn cuda_memcpy_peer_async<T>(
     src: *const T,
     src_device_idx: usize,
     len: usize,
-    stream: &CudaStream) -> CudaResult<()>
+    stream: &mut CudaStream) -> CudaResult<()>
 where T: Copy
 {
   match cudaMemcpyPeerAsync(
