@@ -4,6 +4,16 @@ use std::ffi::{CStr};
 use std::mem::{size_of, zeroed};
 use std::os::raw::{c_void, c_int, c_uint};
 use std::ptr::{null_mut};
+use std::sync::atomic::{ATOMIC_USIZE_INIT, AtomicUsize, Ordering};
+
+static UID_COUNTER: AtomicUsize = ATOMIC_USIZE_INIT;
+
+fn new_uid() -> usize {
+  let prev_uid = UID_COUNTER.fetch_add(1, Ordering::SeqCst);
+  let next_uid = prev_uid + 1;
+  assert!(next_uid != 0);
+  next_uid
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct CudaError(cudaError_t);
@@ -129,7 +139,8 @@ impl CudaDevice {
 }
 
 pub struct CudaStream {
-  pub ptr: cudaStream_t,
+  ptr:  cudaStream_t,
+  uid:  usize,
 }
 
 unsafe impl Send for CudaStream {}
@@ -156,7 +167,8 @@ impl Drop for CudaStream {
 impl CudaStream {
   pub fn default() -> CudaStream {
     CudaStream{
-      ptr: null_mut(),
+      ptr:  null_mut(),
+      uid:  0,
     }
   }
 
@@ -166,12 +178,17 @@ impl CudaStream {
       match cudaStreamCreate(&mut ptr as *mut cudaStream_t) {
         cudaError_cudaSuccess => {
           Ok(CudaStream{
-            ptr: ptr,
+            ptr:  ptr,
+            uid:  new_uid(),
           })
         },
         e => Err(CudaError(e)),
       }
     }
+  }
+
+  pub fn unique_id(&self) -> usize {
+    self.uid
   }
 
   pub unsafe fn as_mut_ptr(&mut self) -> cudaStream_t {
@@ -196,8 +213,8 @@ impl CudaStream {
     }
   }
 
-  pub fn wait_event(&mut self, event: &CudaEvent) -> CudaResult<()> {
-    match unsafe { cudaStreamWaitEvent(self.ptr, event.as_ptr(), 0) } {
+  pub fn wait_event(&mut self, event: &mut CudaEvent) -> CudaResult<()> {
+    match unsafe { cudaStreamWaitEvent(self.ptr, event.as_mut_ptr(), 0) } {
       cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e))
     }
@@ -210,7 +227,8 @@ pub enum CudaEventStatus {
 }
 
 pub struct CudaEvent {
-  pub ptr: cudaEvent_t,
+  ptr:  cudaEvent_t,
+  uid:  usize,
 }
 
 unsafe impl Send for CudaEvent {}
@@ -240,7 +258,8 @@ impl CudaEvent {
       match cudaEventCreate(&mut ptr as *mut cudaEvent_t) {
         cudaError_cudaSuccess => {
           Ok(CudaEvent{
-            ptr: ptr,
+            ptr:  ptr,
+            uid:  new_uid(),
           })
         },
         e => Err(CudaError(e)),
@@ -262,7 +281,8 @@ impl CudaEvent {
       match cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags as c_uint) {
         cudaError_cudaSuccess => {
           Ok(CudaEvent{
-            ptr: ptr,
+            ptr:  ptr,
+            uid:  new_uid(),
           })
         },
         e => Err(CudaError(e)),
@@ -270,7 +290,15 @@ impl CudaEvent {
     }
   }
 
-  pub fn query(&self) -> CudaResult<CudaEventStatus> {
+  pub unsafe fn as_mut_ptr(&mut self) -> cudaEvent_t {
+    self.ptr
+  }
+
+  pub fn unique_id(&self) -> usize {
+    self.uid
+  }
+
+  pub fn query(&mut self) -> CudaResult<CudaEventStatus> {
     match unsafe { cudaEventQuery(self.ptr) } {
       cudaError_cudaSuccess => Ok(CudaEventStatus::Complete),
       e => match e {
@@ -280,7 +308,7 @@ impl CudaEvent {
     }
   }
 
-  pub fn record(&self, stream: &mut CudaStream) -> CudaResult<()> {
+  pub fn record(&mut self, stream: &mut CudaStream) -> CudaResult<()> {
     unsafe {
       match cudaEventRecord(self.ptr, stream.as_mut_ptr()) {
         cudaError_cudaSuccess => Ok(()),
@@ -289,17 +317,13 @@ impl CudaEvent {
     }
   }
 
-  pub fn synchronize(&self) -> CudaResult<()> {
+  pub fn synchronize(&mut self) -> CudaResult<()> {
     unsafe {
       match cudaEventSynchronize(self.ptr) {
         cudaError_cudaSuccess => Ok(()),
         e => Err(CudaError(e)),
       }
     }
-  }
-
-  pub unsafe fn as_ptr(&self) -> cudaEvent_t {
-    self.ptr
   }
 }
 
