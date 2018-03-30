@@ -73,6 +73,19 @@ fn main() {
     .whitelist_function("cudaDeviceCanAccessPeer")
     .whitelist_function("cudaDeviceDisablePeerAccess")
     .whitelist_function("cudaDeviceEnablePeerAccess")
+    // OpenGL interoperability.
+    .whitelist_type("cudaGLDeviceList")
+    .whitelist_function("cudaGLGetDevices")
+    .whitelist_function("cudaGraphicsGLRegisterBuffer")
+    .whitelist_function("cudaGraphicsGLRegisterImage")
+    // Graphics interoperability.
+    .whitelist_type("cudaGraphicsResource")
+    .whitelist_type("cudaGraphicsResource_t")
+    .whitelist_function("cudaGraphicsMapResources")
+    .whitelist_function("cudaGraphicsResourceGetMappedPointer")
+    .whitelist_function("cudaGraphicsResourceSetMapFlags")
+    .whitelist_function("cudaGraphicsUnmapResources")
+    .whitelist_function("cudaGraphicsUnregisterResource")
     .generate()
     .expect("bindgen failed to generate cuda bindings");
   cuda_bindings
