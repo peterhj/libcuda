@@ -9,7 +9,7 @@ use std::sync::atomic::{ATOMIC_USIZE_INIT, AtomicUsize, Ordering};
 static UID_COUNTER: AtomicUsize = ATOMIC_USIZE_INIT;
 
 fn new_uid() -> usize {
-  let prev_uid = UID_COUNTER.fetch_add(1, Ordering::SeqCst);
+  let prev_uid = UID_COUNTER.fetch_add(1, Ordering::Relaxed);
   let next_uid = prev_uid + 1;
   assert!(next_uid != 0);
   next_uid
