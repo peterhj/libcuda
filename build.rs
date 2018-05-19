@@ -12,10 +12,9 @@ fn main() {
 
   println!("cargo:rustc-link-lib=cudart");
 
-  let cuda_bindings = bindgen::Builder::default()
+  let runtime_bindings = bindgen::Builder::default()
     .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
-    .header("wrap.h")
-    //.link("cudart")
+    .header("wrapped_runtime.h")
     // Device management.
     .whitelist_type("cudaDeviceProp")
     .whitelist_function("cudaDeviceReset")
@@ -87,8 +86,19 @@ fn main() {
     .whitelist_function("cudaGraphicsUnmapResources")
     .whitelist_function("cudaGraphicsUnregisterResource")
     .generate()
-    .expect("bindgen failed to generate cuda bindings");
-  cuda_bindings
-    .write_to_file(out_dir.join("cuda_bind.rs"))
-    .expect("bindgen failed to write cuda bindings");
+    .expect("bindgen failed to generate runtime bindings");
+  runtime_bindings
+    .write_to_file(out_dir.join("runtime_bind.rs"))
+    .expect("bindgen failed to write runtime bindings");
+
+  let libtypes_bindings = bindgen::Builder::default()
+    .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
+    .header("wrapped_libtypes.h")
+    .whitelist_type("cudaDataType")
+    .whitelist_type("cudaDataType_t")
+    .generate()
+    .expect("bindgen failed to generate libtypes bindings");
+  libtypes_bindings
+    .write_to_file(out_dir.join("libtypes_bind.rs"))
+    .expect("bindgen failed to write libtypes bindings");
 }
