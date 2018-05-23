@@ -4,5 +4,3 @@
 pub mod driver;
 pub mod ffi;
 pub mod runtime;
-#[cfg(test)]
-mod tests;

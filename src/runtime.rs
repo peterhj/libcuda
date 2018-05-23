@@ -327,6 +327,15 @@ impl CudaEvent {
   }
 }
 
+pub unsafe fn cuda_alloc_host<T>(len: usize) -> CudaResult<*mut T> where T: Copy {
+  let mut ptr: *mut c_void = null_mut();
+  let size = len * size_of::<T>();
+  match cudaMallocHost(&mut ptr as *mut *mut c_void, size) {
+    cudaError_cudaSuccess => Ok(ptr as *mut T),
+    e => Err(CudaError(e)),
+  }
+}
+
 pub unsafe fn cuda_alloc_device<T>(len: usize) -> CudaResult<*mut T> where T: Copy {
   let mut dptr: *mut c_void = null_mut();
   let size = len * size_of::<T>();
