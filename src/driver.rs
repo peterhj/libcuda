@@ -1,13 +1,12 @@
 use ::ffi::driver::*;
 
 pub fn is_cuda_initialized() -> bool {
-  let mut flags: u32 = 0;
-  let mut active: i32 = 0;
-  let result = unsafe { cuDevicePrimaryCtxGetState(0, &mut flags as *mut _, &mut active as *mut _) };
+  let mut count: i32 = 0;
+  let result = unsafe { cuDeviceGetCount(&mut count as *mut _) };
   match result {
     cudaError_enum_CUDA_SUCCESS => true,
     cudaError_enum_CUDA_ERROR_NOT_INITIALIZED => false,
-    e => panic!("FATAL: cuInit failed: {}", e),
+    e => panic!("FATAL: cuDeviceGetCount failed: {}", e),
   }
 }
 
