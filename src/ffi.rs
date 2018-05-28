@@ -2,6 +2,10 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 
+pub mod driver {
+include!(concat!(env!("OUT_DIR"), "/driver_bind.rs"));
+}
+
 pub mod library_types {
 include!(concat!(env!("OUT_DIR"), "/libtypes_bind.rs"));
 }

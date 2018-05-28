@@ -10,7 +10,26 @@ fn main() {
     Err(_) => "/usr/local/cuda".to_owned(),
   });
 
+  println!("cargo:rustc-link-lib=cuda");
   println!("cargo:rustc-link-lib=cudart");
+
+  let driver_bindings = bindgen::Builder::default()
+    .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
+    .header("wrapped_driver.h")
+    .whitelist_type("CUresult")
+    .whitelist_type("CUdevice")
+    .whitelist_type("CUcontext")
+    .whitelist_type("CUdeviceptr")
+    .whitelist_type("CUstream")
+    .whitelist_type("CUevent")
+    .whitelist_function("cuInit")
+    .whitelist_function("cuDevicePrimaryCtxGetState")
+    .whitelist_function("cuCtxGetCurrent")
+    .generate()
+    .expect("bindgen failed to generate driver bindings");
+  driver_bindings
+    .write_to_file(out_dir.join("driver_bind.rs"))
+    .expect("bindgen failed to write driver bindings");
 
   let runtime_bindings = bindgen::Builder::default()
     .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
