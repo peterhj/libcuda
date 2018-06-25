@@ -427,18 +427,18 @@ where T: Copy
 
 pub unsafe fn cuda_memcpy_peer_async<T>(
     dst: *mut T,
-    dst_device_idx: usize,
+    dst_device_idx: i32,
     src: *const T,
-    src_device_idx: usize,
+    src_device_idx: i32,
     len: usize,
     stream: &mut CudaStream) -> CudaResult<()>
 where T: Copy
 {
   match cudaMemcpyPeerAsync(
       dst as *mut c_void,
-      dst_device_idx as c_int,
+      dst_device_idx,
       src as *const c_void,
-      src_device_idx as c_int,
+      src_device_idx,
       len * size_of::<T>(),
       stream.as_mut_ptr())
   {
