@@ -16,7 +16,7 @@ fn new_uid() -> usize {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct CudaError(cudaError_t);
+pub struct CudaError(pub cudaError_t);
 
 impl CudaError {
   pub fn get_code(&self) -> u32 {
