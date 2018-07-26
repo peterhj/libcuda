@@ -98,6 +98,8 @@ fn main() {
     .whitelist_function("cudaMemRangeGetAttributes")
     .whitelist_function("cudaMemcpy")
     .whitelist_function("cudaMemcpyAsync")
+    .whitelist_function("cudaMemcpy2D")
+    .whitelist_function("cudaMemcpy2DAsync")
     .whitelist_function("cudaMemcpyPeer")
     .whitelist_function("cudaMemcpyPeerAsync")
     .whitelist_function("cudaMemset")

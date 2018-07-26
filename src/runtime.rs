@@ -376,7 +376,7 @@ pub enum CudaMemcpyKind {
 }
 
 impl CudaMemcpyKind {
-  pub fn to_bind_type(&self) -> cudaMemcpyKind {
+  pub fn to_raw(&self) -> cudaMemcpyKind {
     match *self {
       CudaMemcpyKind::HostToHost      => cudaMemcpyKind_cudaMemcpyHostToHost,
       CudaMemcpyKind::HostToDevice    => cudaMemcpyKind_cudaMemcpyHostToDevice,
@@ -398,7 +398,7 @@ where T: Copy
       dst as *mut c_void,
       src as *const c_void,
       len * size_of::<T>(),
-      kind.to_bind_type())
+      kind.to_raw())
   {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
@@ -417,7 +417,36 @@ where T: Copy
       dst as *mut c_void,
       src as *const c_void,
       len * size_of::<T>(),
-      kind.to_bind_type(),
+      kind.to_raw(),
+      stream.as_mut_ptr())
+  {
+    cudaError_cudaSuccess => Ok(()),
+    e => Err(CudaError(e)),
+  }
+}
+
+pub unsafe fn cuda_memcpy_2d_async<T>(
+    dst: *mut T,
+    dst_pitch_bytes: usize,
+    src: *const T,
+    src_pitch_bytes: usize,
+    width: usize,
+    height: usize,
+    kind: CudaMemcpyKind,
+    stream: &mut CudaStream) -> CudaResult<()>
+where T: Copy
+{
+  let width_bytes = width * size_of::<T>();
+  assert!(width_bytes <= dst_pitch_bytes);
+  assert!(width_bytes <= src_pitch_bytes);
+  match cudaMemcpy2DAsync(
+      dst as *mut c_void,
+      dst_pitch_bytes,
+      src as *const c_void,
+      src_pitch_bytes,
+      width_bytes,
+      height,
+      kind.to_raw(),
       stream.as_mut_ptr())
   {
     cudaError_cudaSuccess => Ok(()),
