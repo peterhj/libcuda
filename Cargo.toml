@@ -9,7 +9,7 @@ keywords = ["cuda"]
 build = "build.rs"
 
 [build-dependencies]
-bindgen = "*"
+bindgen = "^0.38"
 
 [lib]
 name = "cuda"
