@@ -1,6 +1,6 @@
 [package]
 name = "cuda"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Peter Jin <peterhaijin@gmail.com>"]
 license = "BSD-2-Clause"
 description = "CUDA API bindings."

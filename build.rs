@@ -1,6 +1,7 @@
 extern crate bindgen;
 
 use std::env;
+use std::fs;
 use std::path::{PathBuf};
 
 fn main() {
@@ -13,17 +14,25 @@ fn main() {
   println!("cargo:rustc-link-lib=cuda");
   println!("cargo:rustc-link-lib=cudart");
 
-  let driver_bindings = bindgen::Builder::default()
+  fs::remove_file(out_dir.join("driver_bind.rs")).ok();
+  bindgen::Builder::default()
     .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
     .header("wrapped_driver.h")
+    .whitelist_recursively(false)
+    .whitelist_type("cudaError_enum")
     .whitelist_type("CUresult")
     .whitelist_type("CUdevice")
     .whitelist_type("CUdevice_attribute")
+    .whitelist_type("CUdevice_attribute_enum")
+    .whitelist_type("CUuuid_st")
     .whitelist_type("CUuuid")
+    .whitelist_type("CUctx_st")
     .whitelist_type("CUcontext")
-    .whitelist_type("CUdeviceptr")
+    .whitelist_type("CUstream_st")
     .whitelist_type("CUstream")
+    .whitelist_type("CUevent_st")
     .whitelist_type("CUevent")
+    .whitelist_type("CUdeviceptr")
     .whitelist_function("cuInit")
     .whitelist_function("cuDeviceGet")
     .whitelist_function("cuDeviceGetAttr")
@@ -41,14 +50,36 @@ fn main() {
     .whitelist_function("cuCtxGetDevice")
     .whitelist_function("cuStreamGetCtx")
     .generate()
-    .expect("bindgen failed to generate driver bindings");
-  driver_bindings
+    .expect("bindgen failed to generate driver bindings")
     .write_to_file(out_dir.join("driver_bind.rs"))
     .expect("bindgen failed to write driver bindings");
 
-  let runtime_bindings = bindgen::Builder::default()
+  fs::remove_file(out_dir.join("driver_types_bind.rs")).ok();
+  bindgen::Builder::default()
+    .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
+    .header("wrapped_driver_types.h")
+    .whitelist_recursively(false)
+    .whitelist_type("cudaError")
+    .whitelist_type("cudaError_t")
+    .whitelist_type("cudaDeviceAttr")
+    .whitelist_type("cudaStream_t")
+    .whitelist_type("cudaEvent_t")
+    .whitelist_type("cudaMemoryAdvise")
+    .whitelist_type("cudaMemcpyKind")
+    .whitelist_type("cudaMemRangeAttribute")
+    .whitelist_type("cudaGLDeviceList")
+    .whitelist_type("cudaGraphicsResource")
+    .whitelist_type("cudaGraphicsResource_t")
+    .generate()
+    .expect("bindgen failed to generate driver types bindings")
+    .write_to_file(out_dir.join("driver_types_bind.rs"))
+    .expect("bindgen failed to write driver types bindings");
+
+  fs::remove_file(out_dir.join("runtime_bind.rs")).ok();
+  bindgen::Builder::default()
     .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
     .header("wrapped_runtime.h")
+    .whitelist_recursively(false)
     // Device management.
     .whitelist_type("cudaDeviceProp")
     .whitelist_function("cudaDeviceReset")
@@ -61,11 +92,9 @@ fn main() {
     .whitelist_function("cudaSetDevice")
     .whitelist_function("cudaSetDeviceFlags")
     // Error handling.
-    .whitelist_type("cudaError_t")
     .whitelist_function("cudaGetErrorString")
     // Stream management.
-    .whitelist_type("CUstream_st")
-    .whitelist_type("cudaStream_t")
+    .whitelist_type("cudaStreamCallback_t")
     .whitelist_function("cudaStreamCreate")
     .whitelist_function("cudaStreamCreateWithFlags")
     .whitelist_function("cudaStreamCreateWithPriority")
@@ -76,7 +105,6 @@ fn main() {
     .whitelist_function("cudaStreamSynchronize")
     .whitelist_function("cudaStreamWaitEvent")
     // Event management.
-    .whitelist_type("cudaEvent_t")
     .whitelist_function("cudaEventCreate")
     .whitelist_function("cudaEventCreateWithFlags")
     .whitelist_function("cudaEventDestroy")
@@ -85,8 +113,6 @@ fn main() {
     .whitelist_function("cudaEventRecord")
     .whitelist_function("cudaEventSynchronize")
     // Memory management.
-    .whitelist_type("cudaMemoryAdvise")
-    .whitelist_type("cudaMemRangeAttribute")
     .whitelist_function("cudaMalloc")
     .whitelist_function("cudaFree")
     .whitelist_function("cudaMallocHost")
@@ -109,32 +135,29 @@ fn main() {
     .whitelist_function("cudaDeviceDisablePeerAccess")
     .whitelist_function("cudaDeviceEnablePeerAccess")
     // OpenGL interoperability.
-    .whitelist_type("cudaGLDeviceList")
     .whitelist_function("cudaGLGetDevices")
     .whitelist_function("cudaGraphicsGLRegisterBuffer")
     .whitelist_function("cudaGraphicsGLRegisterImage")
     // Graphics interoperability.
-    .whitelist_type("cudaGraphicsResource")
-    .whitelist_type("cudaGraphicsResource_t")
     .whitelist_function("cudaGraphicsMapResources")
     .whitelist_function("cudaGraphicsResourceGetMappedPointer")
     .whitelist_function("cudaGraphicsResourceSetMapFlags")
     .whitelist_function("cudaGraphicsUnmapResources")
     .whitelist_function("cudaGraphicsUnregisterResource")
     .generate()
-    .expect("bindgen failed to generate runtime bindings");
-  runtime_bindings
+    .expect("bindgen failed to generate runtime bindings")
     .write_to_file(out_dir.join("runtime_bind.rs"))
     .expect("bindgen failed to write runtime bindings");
 
-  let libtypes_bindings = bindgen::Builder::default()
+  fs::remove_file(out_dir.join("libtypes_bind.rs")).ok();
+  bindgen::Builder::default()
     .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
     .header("wrapped_libtypes.h")
+    .whitelist_recursively(false)
     .whitelist_type("cudaDataType")
     .whitelist_type("cudaDataType_t")
     .generate()
-    .expect("bindgen failed to generate libtypes bindings");
-  libtypes_bindings
+    .expect("bindgen failed to generate libtypes bindings")
     .write_to_file(out_dir.join("libtypes_bind.rs"))
     .expect("bindgen failed to write libtypes bindings");
 }

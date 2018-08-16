@@ -1,3 +1,4 @@
+use ffi::driver_types::*;
 use ffi::runtime::*;
 
 use std::ffi::{CStr};
