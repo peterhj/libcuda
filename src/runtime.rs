@@ -5,7 +5,6 @@ use std::ffi::{CStr};
 use std::mem::{size_of, zeroed};
 use std::os::raw::{c_void, c_int, c_uint};
 use std::ptr::{null_mut};
-use std::sync::atomic::{ATOMIC_USIZE_INIT, AtomicUsize, Ordering};
 
 #[derive(Clone, Copy, Debug)]
 pub struct CudaError(pub cudaError_t);
