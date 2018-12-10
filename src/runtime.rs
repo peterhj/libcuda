@@ -7,15 +7,6 @@ use std::os::raw::{c_void, c_int, c_uint};
 use std::ptr::{null_mut};
 use std::sync::atomic::{ATOMIC_USIZE_INIT, AtomicUsize, Ordering};
 
-static UID_COUNTER: AtomicUsize = ATOMIC_USIZE_INIT;
-
-fn new_uid() -> usize {
-  let prev_uid = UID_COUNTER.fetch_add(1, Ordering::Relaxed);
-  let next_uid = prev_uid + 1;
-  assert!(next_uid != 0);
-  next_uid
-}
-
 #[derive(Clone, Copy, Debug)]
 pub struct CudaError(pub cudaError_t);
 
@@ -141,7 +132,6 @@ impl CudaDevice {
 
 pub struct CudaStream {
   ptr:  cudaStream_t,
-  uid:  usize,
 }
 
 unsafe impl Send for CudaStream {}
@@ -167,29 +157,17 @@ impl Drop for CudaStream {
 
 impl CudaStream {
   pub fn default() -> CudaStream {
-    CudaStream{
-      ptr:  null_mut(),
-      uid:  0,
-    }
+    CudaStream{ptr: null_mut()}
   }
 
   pub fn create() -> CudaResult<CudaStream> {
     unsafe {
       let mut ptr: cudaStream_t = null_mut();
       match cudaStreamCreate(&mut ptr as *mut cudaStream_t) {
-        cudaError_cudaSuccess => {
-          Ok(CudaStream{
-            ptr:  ptr,
-            uid:  new_uid(),
-          })
-        },
+        cudaError_cudaSuccess => Ok(CudaStream{ptr: ptr}),
         e => Err(CudaError(e)),
       }
     }
-  }
-
-  pub fn unique_id(&self) -> usize {
-    self.uid
   }
 
   pub unsafe fn as_mut_ptr(&mut self) -> cudaStream_t {
@@ -222,6 +200,7 @@ impl CudaStream {
   }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub enum CudaEventStatus {
   Complete,
   NotReady,
@@ -229,7 +208,6 @@ pub enum CudaEventStatus {
 
 pub struct CudaEvent {
   ptr:  cudaEvent_t,
-  uid:  usize,
 }
 
 unsafe impl Send for CudaEvent {}
@@ -242,7 +220,7 @@ impl Drop for CudaEvent {
         match cudaEventDestroy(self.ptr) {
           cudaError_cudaSuccess => {}
           cudaError_cudaErrorCudartUnloading => {
-            // XXX(20160308): Sometimes drop() is called while the global runtime
+            // NB(20160308): Sometimes drop() is called while the global runtime
             // is shutting down; suppress these errors.
           }
           e => panic!("FATAL: CudaEvent::drop(): failed to destroy: {:?}", e),
@@ -255,14 +233,9 @@ impl Drop for CudaEvent {
 impl CudaEvent {
   pub fn create() -> CudaResult<CudaEvent> {
     unsafe {
-      let mut ptr = 0 as cudaEvent_t;
+      let mut ptr = null_mut() as cudaEvent_t;
       match cudaEventCreate(&mut ptr as *mut cudaEvent_t) {
-        cudaError_cudaSuccess => {
-          Ok(CudaEvent{
-            ptr:  ptr,
-            uid:  new_uid(),
-          })
-        },
+        cudaError_cudaSuccess => Ok(CudaEvent{ptr: ptr}),
         e => Err(CudaError(e)),
       }
     }
@@ -278,14 +251,9 @@ impl CudaEvent {
 
   pub fn create_with_flags(flags: u32) -> CudaResult<CudaEvent> {
     unsafe {
-      let mut ptr = 0 as cudaEvent_t;
-      match cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags as c_uint) {
-        cudaError_cudaSuccess => {
-          Ok(CudaEvent{
-            ptr:  ptr,
-            uid:  new_uid(),
-          })
-        },
+      let mut ptr = null_mut() as cudaEvent_t;
+      match cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags) {
+        cudaError_cudaSuccess => Ok(CudaEvent{ptr: ptr}),
         e => Err(CudaError(e)),
       }
     }
@@ -293,10 +261,6 @@ impl CudaEvent {
 
   pub unsafe fn as_mut_ptr(&mut self) -> cudaEvent_t {
     self.ptr
-  }
-
-  pub fn unique_id(&self) -> usize {
-    self.uid
   }
 
   pub fn query(&mut self) -> CudaResult<CudaEventStatus> {
@@ -328,7 +292,7 @@ impl CudaEvent {
   }
 }
 
-pub unsafe fn cuda_alloc_host<T>(len: usize) -> CudaResult<*mut T> where T: Copy {
+pub unsafe fn cuda_alloc_host<T>(len: usize) -> CudaResult<*mut T> where T: Copy + 'static {
   let mut ptr: *mut c_void = null_mut();
   let size = len * size_of::<T>();
   match cudaMallocHost(&mut ptr as *mut *mut c_void, size) {
@@ -337,7 +301,7 @@ pub unsafe fn cuda_alloc_host<T>(len: usize) -> CudaResult<*mut T> where T: Copy
   }
 }
 
-pub unsafe fn cuda_alloc_device<T>(len: usize) -> CudaResult<*mut T> where T: Copy {
+pub unsafe fn cuda_alloc_device<T>(len: usize) -> CudaResult<*mut T> where T: Copy + 'static {
   let mut dptr: *mut c_void = null_mut();
   let size = len * size_of::<T>();
   match cudaMalloc(&mut dptr as *mut *mut c_void, size) {
@@ -346,7 +310,7 @@ pub unsafe fn cuda_alloc_device<T>(len: usize) -> CudaResult<*mut T> where T: Co
   }
 }
 
-pub unsafe fn cuda_free_device<T>(dptr: *mut T) -> CudaResult<()> where T: Copy {
+pub unsafe fn cuda_free_device<T>(dptr: *mut T) -> CudaResult<()> where T: Copy + 'static {
   match cudaFree(dptr as *mut c_void) {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
@@ -393,7 +357,7 @@ pub unsafe fn cuda_memcpy<T>(
     src: *const T,
     len: usize,
     kind: CudaMemcpyKind) -> CudaResult<()>
-where T: Copy
+where T: Copy + 'static
 {
   match cudaMemcpy(
       dst as *mut c_void,
@@ -412,7 +376,7 @@ pub unsafe fn cuda_memcpy_async<T>(
     len: usize,
     kind: CudaMemcpyKind,
     stream: &mut CudaStream) -> CudaResult<()>
-where T: Copy
+where T: Copy + 'static
 {
   match cudaMemcpyAsync(
       dst as *mut c_void,
@@ -435,7 +399,7 @@ pub unsafe fn cuda_memcpy_2d_async<T>(
     height: usize,
     kind: CudaMemcpyKind,
     stream: &mut CudaStream) -> CudaResult<()>
-where T: Copy
+where T: Copy + 'static
 {
   let width_bytes = width * size_of::<T>();
   assert!(width_bytes <= dst_pitch_bytes);
@@ -462,7 +426,7 @@ pub unsafe fn cuda_memcpy_peer_async<T>(
     src_device_idx: i32,
     len: usize,
     stream: &mut CudaStream) -> CudaResult<()>
-where T: Copy
+where T: Copy + 'static
 {
   match cudaMemcpyPeerAsync(
       dst as *mut c_void,
