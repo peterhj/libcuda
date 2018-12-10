@@ -19,6 +19,8 @@ fn main() {
     .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
     .header("wrapped_driver.h")
     .whitelist_recursively(false)
+    .whitelist_var("__CUDA_API_VERSION")
+    .whitelist_var("CUDA_VERSION")
     .whitelist_type("cudaError_enum")
     .whitelist_type("CUresult")
     .whitelist_type("CUdevice")
