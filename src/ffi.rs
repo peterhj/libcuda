@@ -2,6 +2,5 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 
-pub mod cuda {
+use cuda_ffi_types::cuda::*;
 include!(concat!(env!("OUT_DIR"), "/cuda.rs"));
-}

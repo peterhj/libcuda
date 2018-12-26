@@ -1,4 +1,6 @@
-use ::ffi::driver::*;
+use crate::ffi::*;
+
+use cuda_ffi_types::cuda::*;
 
 pub fn is_cuda_initialized() -> bool {
   let mut count: i32 = 0;
