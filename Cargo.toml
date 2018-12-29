@@ -33,7 +33,6 @@ bindgen = { version = "^0.45", optional = true }
 
 [dependencies]
 cuda-ffi-types = { git = "https://github.com/peterhj/cuda-ffi-types" }
-static_assertions = "0.3.1"
 
 [lib]
 name = "cuda"
