@@ -1,21 +1,83 @@
+#[cfg(feature = "fresh")]
 extern crate bindgen;
 
+#[cfg(feature = "fresh")]
 use std::env;
+#[cfg(feature = "fresh")]
 use std::fs;
+#[cfg(feature = "fresh")]
 use std::path::{PathBuf};
 
+#[cfg(all(
+    not(feature = "fresh"),
+    not(any(
+        feature = "cuda_6_5",
+        feature = "cuda_7_0",
+        feature = "cuda_7_5",
+        feature = "cuda_8_0",
+        feature = "cuda_9_0",
+        feature = "cuda_9_1",
+        feature = "cuda_9_2",
+        feature = "cuda_10_0",
+    ))
+))]
 fn main() {
-  let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-  let cuda_dir = PathBuf::from(match env::var("CUDA_HOME") {
-    Ok(path) => path,
-    Err(_) => "/usr/local/cuda".to_owned(),
-  });
+  compile_error!("a cuda version feature must be enabled");
+}
 
+#[cfg(all(
+    not(feature = "fresh"),
+    any(
+        feature = "cuda_6_5",
+        feature = "cuda_7_0",
+        feature = "cuda_7_5",
+        feature = "cuda_8_0",
+        feature = "cuda_9_0",
+        feature = "cuda_9_1",
+        feature = "cuda_9_2",
+        feature = "cuda_10_0",
+    )
+))]
+fn main() {
+  println!("cargo:rustc-link-lib=cuda");
+}
+
+#[cfg(feature = "fresh")]
+fn main() {
   println!("cargo:rustc-link-lib=cuda");
 
-  fs::remove_file(out_dir.join("cuda.rs")).ok();
+  let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+  let cuda_dir = PathBuf::from(
+      env::var("CUDA_HOME")
+        .or_else(|_| env::var("CUDA_PATH"))
+        .unwrap_or_else(|_| "/usr/local/cuda".to_owned())
+  );
+  let cuda_include_dir = cuda_dir.join("include");
+
+  #[cfg(feature = "cuda_6_5")]
+  let a_cuda_version_feature_must_be_enabled = "v6_5";
+  #[cfg(feature = "cuda_7_0")]
+  let a_cuda_version_feature_must_be_enabled = "v7_0";
+  #[cfg(feature = "cuda_7_5")]
+  let a_cuda_version_feature_must_be_enabled = "v7_5";
+  #[cfg(feature = "cuda_8_0")]
+  let a_cuda_version_feature_must_be_enabled = "v8_0";
+  #[cfg(feature = "cuda_9_0")]
+  let a_cuda_version_feature_must_be_enabled = "v9_0";
+  #[cfg(feature = "cuda_9_1")]
+  let a_cuda_version_feature_must_be_enabled = "v9_1";
+  #[cfg(feature = "cuda_9_2")]
+  let a_cuda_version_feature_must_be_enabled = "v9_2";
+  #[cfg(feature = "cuda_10_0")]
+  let a_cuda_version_feature_must_be_enabled = "v10_0";
+  let v = a_cuda_version_feature_must_be_enabled;
+
+  let gensrc_dir = manifest_dir.join("src").join("ffi").join(v);
+  fs::create_dir(&gensrc_dir).ok();
+
+  fs::remove_file(gensrc_dir.join("_cuda.rs")).ok();
   bindgen::Builder::default()
-    .clang_arg(format!("-I{}", cuda_dir.join("include").as_os_str().to_str().unwrap()))
+    .clang_arg(format!("-I{}", cuda_include_dir.as_os_str().to_str().unwrap()))
     .header("wrapped_cuda.h")
     .whitelist_recursively(false)
     .whitelist_function("cuInit")
@@ -48,6 +110,6 @@ fn main() {
     .whitelist_function("cuLaunchKernel")
     .generate()
     .expect("bindgen failed to generate driver bindings")
-    .write_to_file(out_dir.join("cuda.rs"))
+    .write_to_file(gensrc_dir.join("_cuda.rs"))
     .expect("bindgen failed to write driver bindings");
 }

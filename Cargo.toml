@@ -11,6 +11,7 @@ build = "build.rs"
 
 [features]
 default         = []
+fresh           = ["bindgen"]
 cuda_6_5        = ["cuda-ffi-types/cuda_6_5"]
 cuda_7_0        = ["cuda-ffi-types/cuda_7_0", "cuda_gte_7_0"]
 cuda_7_5        = ["cuda-ffi-types/cuda_7_5", "cuda_gte_7_0", "cuda_gte_7_5"]
@@ -28,7 +29,7 @@ cuda_gte_9_2    = []
 cuda_gte_10_0   = []
 
 [build-dependencies]
-bindgen = "^0.45"
+bindgen = { version = "^0.45", optional = true }
 
 [dependencies]
 cuda-ffi-types = { git = "https://github.com/peterhj/cuda-ffi-types" }
