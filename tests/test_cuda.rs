@@ -1,14 +1,17 @@
 extern crate cuda;
 
-use cuda::driver::*;
+use cuda::*;
 
 #[test]
-fn test_cuda() {
-  println!();
-  println!("DEBUG: test cuda init...");
-  println!("DEBUG: cuda init? {:?}", is_cuda_initialized());
-  println!("DEBUG: cuda init...");
+fn test_init() {
+  assert!(!is_cuda_initialized());
   cuda_init();
-  println!("DEBUG: test cuda init...");
-  println!("DEBUG: cuda init? {:?}", is_cuda_initialized());
+  assert!(is_cuda_initialized());
+}
+
+#[test]
+fn test_version_no_init() {
+  let v = get_version();
+  println!("version? {:?}", v);
+  assert!(v.is_ok());
 }

@@ -2,7 +2,7 @@ use crate::ffi::*;
 
 use cuda_ffi_types::cuda::*;
 
-use std::os::raw::{c_void};
+use std::os::raw::{c_int, c_void};
 use std::path::{PathBuf};
 use std::ptr::{null_mut};
 
@@ -25,6 +25,14 @@ pub fn cuda_init() {
 }
 
 pub type CuResult<T> = Result<T, CUresult>;
+
+pub fn get_version() -> CuResult<i32> {
+  let mut version: c_int = -1;
+  match unsafe { cuDriverGetVersion(&mut version as *mut c_int) } {
+    cudaError_enum_CUDA_SUCCESS => Ok(version),
+    e => Err(e),
+  }
+}
 
 pub struct CuModule {
   ptr:  CUmodule,

@@ -19,6 +19,7 @@ fn main() {
     .header("wrapped_cuda.h")
     .whitelist_recursively(false)
     .whitelist_function("cuInit")
+    .whitelist_function("cuDriverGetVersion")
     .whitelist_function("cuDeviceGet")
     .whitelist_function("cuDeviceGetAttr")
     .whitelist_function("cuDeviceGetCount")
