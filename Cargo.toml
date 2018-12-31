@@ -7,19 +7,18 @@ license = "BSD-2-Clause"
 description = "CUDA driver API bindings."
 repository = "https://github.com/peterhj/libcuda"
 keywords = ["cuda"]
-build = "build.rs"
 
 [features]
 default         = []
 fresh           = ["bindgen"]
-cuda_6_5        = ["cuda-ffi-types/cuda_6_5"]
-cuda_7_0        = ["cuda-ffi-types/cuda_7_0", "cuda_gte_7_0"]
-cuda_7_5        = ["cuda-ffi-types/cuda_7_5", "cuda_gte_7_0", "cuda_gte_7_5"]
-cuda_8_0        = ["cuda-ffi-types/cuda_8_0", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0"]
-cuda_9_0        = ["cuda-ffi-types/cuda_9_0", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0"]
-cuda_9_1        = ["cuda-ffi-types/cuda_9_1", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0", "cuda_gte_9_1"]
-cuda_9_2        = ["cuda-ffi-types/cuda_9_2", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0", "cuda_gte_9_1", "cuda_gte_9_2"]
-cuda_10_0       = ["cuda-ffi-types/cuda_10_0", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0", "cuda_gte_9_1", "cuda_gte_9_2", "cuda_gte_10_0"]
+cuda_6_5        = ["cuda_api_types/cuda_6_5"]
+cuda_7_0        = ["cuda_api_types/cuda_7_0", "cuda_gte_7_0"]
+cuda_7_5        = ["cuda_api_types/cuda_7_5", "cuda_gte_7_0", "cuda_gte_7_5"]
+cuda_8_0        = ["cuda_api_types/cuda_8_0", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0"]
+cuda_9_0        = ["cuda_api_types/cuda_9_0", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0"]
+cuda_9_1        = ["cuda_api_types/cuda_9_1", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0", "cuda_gte_9_1"]
+cuda_9_2        = ["cuda_api_types/cuda_9_2", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0", "cuda_gte_9_1", "cuda_gte_9_2"]
+cuda_10_0       = ["cuda_api_types/cuda_10_0", "cuda_gte_7_0", "cuda_gte_7_5", "cuda_gte_8_0", "cuda_gte_9_0", "cuda_gte_9_1", "cuda_gte_9_2", "cuda_gte_10_0"]
 cuda_gte_7_0    = []
 cuda_gte_7_5    = []
 cuda_gte_8_0    = []
@@ -32,8 +31,4 @@ cuda_gte_10_0   = []
 bindgen = { version = "^0.45", optional = true }
 
 [dependencies]
-cuda-ffi-types = { git = "https://github.com/peterhj/cuda-ffi-types" }
-
-[lib]
-name = "cuda"
-path = "src/lib.rs"
+cuda_api_types = { git = "https://github.com/peterhj/cuda_api_types" }

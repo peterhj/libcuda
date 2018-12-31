@@ -1,6 +1,6 @@
 #![allow(non_upper_case_globals)]
 
-extern crate cuda_ffi_types;
+extern crate cuda_api_types;
 
 pub use crate::driver::{
   CuModule,

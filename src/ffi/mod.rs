@@ -7,7 +7,7 @@ pub use self::v::cuda::*;
 #[cfg(feature = "cuda_8_0")]
 mod v {
   pub mod cuda {
-    use cuda_ffi_types::cuda::*;
+    use cuda_api_types::cuda::*;
     include!("v8_0/_cuda.rs");
   }
 }
@@ -15,7 +15,7 @@ mod v {
 #[cfg(feature = "cuda_9_0")]
 mod v {
   pub mod cuda {
-    use cuda_ffi_types::cuda::*;
+    use cuda_api_types::cuda::*;
     include!("v9_0/_cuda.rs");
   }
 }
@@ -23,7 +23,7 @@ mod v {
 #[cfg(feature = "cuda_9_2")]
 mod v {
   pub mod cuda {
-    use cuda_ffi_types::cuda::*;
+    use cuda_api_types::cuda::*;
     include!("v9_2/_cuda.rs");
   }
 }
