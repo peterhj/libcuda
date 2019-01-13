@@ -27,3 +27,11 @@ mod v {
     include!("v9_2/_cuda.rs");
   }
 }
+
+#[cfg(feature = "cuda_10_0")]
+mod v {
+  pub mod cuda {
+    use cuda_api_types::cuda::*;
+    include!("v10_0/_cuda.rs");
+  }
+}
