@@ -134,14 +134,6 @@ extern "C" {
     ) -> CUresult;
 }
 extern "C" {
-    pub fn cuMemPrefetchAsync(
-        devPtr: CUdeviceptr,
-        count: usize,
-        dstDevice: CUdevice,
-        hStream: CUstream,
-    ) -> CUresult;
-}
-extern "C" {
     pub fn cuLaunchKernel(
         f: CUfunction,
         gridDimX: ::std::os::raw::c_uint,
@@ -154,26 +146,5 @@ extern "C" {
         hStream: CUstream,
         kernelParams: *mut *mut ::std::os::raw::c_void,
         extra: *mut *mut ::std::os::raw::c_void,
-    ) -> CUresult;
-}
-extern "C" {
-    pub fn cuLaunchCooperativeKernel(
-        f: CUfunction,
-        gridDimX: ::std::os::raw::c_uint,
-        gridDimY: ::std::os::raw::c_uint,
-        gridDimZ: ::std::os::raw::c_uint,
-        blockDimX: ::std::os::raw::c_uint,
-        blockDimY: ::std::os::raw::c_uint,
-        blockDimZ: ::std::os::raw::c_uint,
-        sharedMemBytes: ::std::os::raw::c_uint,
-        hStream: CUstream,
-        kernelParams: *mut *mut ::std::os::raw::c_void,
-    ) -> CUresult;
-}
-extern "C" {
-    pub fn cuLaunchCooperativeKernelMultiDevice(
-        launchParamsList: *mut CUDA_LAUNCH_PARAMS,
-        numDevices: ::std::os::raw::c_uint,
-        flags: ::std::os::raw::c_uint,
     ) -> CUresult;
 }
