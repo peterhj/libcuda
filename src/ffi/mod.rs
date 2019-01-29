@@ -6,6 +6,8 @@ pub use self::v::cuda;
 #[cfg(feature = "cuda_gte_8_0")]
 pub use self::v::cuda_fp16;
 pub use self::v::cuda_runtime_api;
+#[cfg(feature = "cuda_gte_10_0")]
+pub use self::v::curand;
 pub use self::v::driver_types;
 #[cfg(feature = "cuda_gte_8_0")]
 pub use self::v::library_types;
@@ -108,6 +110,9 @@ mod v {
   pub mod cuda_fp16         { include!("v10_0/_cuda_fp16.rs"); }
   pub mod cuda_runtime_api  { use crate::ffi::driver_types::*;
                               include!("v10_0/_cuda_runtime_api.rs"); }
+  pub mod curand            { use crate::ffi::driver_types::*;
+                              use crate::ffi::library_types::*;
+                              include!("v10_0/_curand.rs"); }
   pub mod driver_types      { use crate::ffi::cuda::*;
                               include!("v10_0/_driver_types.rs"); }
   pub mod library_types     { include!("v10_0/_library_types.rs"); }

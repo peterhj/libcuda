@@ -40,6 +40,7 @@ fn main() {
   println!("cargo:rerun-if-changed=build.rs");
   println!("cargo:rustc-link-lib=cuda");
   println!("cargo:rustc-link-lib=cudart");
+  println!("cargo:rustc-link-lib=curand");
   let maybe_cuda_dir =
       env::var("CUDA_HOME")
         .or_else(|_| env::var("CUDA_PATH"))
@@ -58,6 +59,7 @@ fn main() {
   println!("cargo:rerun-if-changed=build.rs");
   println!("cargo:rustc-link-lib=cuda");
   println!("cargo:rustc-link-lib=cudart");
+  println!("cargo:rustc-link-lib=curand");
 
   let maybe_cuda_dir =
       env::var("CUDA_HOME")
@@ -326,6 +328,66 @@ fn main() {
     .write_to_file(gensrc_dir.join("_cuda_runtime_api.rs"))
     .expect("bindgen failed to write runtime bindings");
 
+  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_curand.rs").display());
+  fs::remove_file(gensrc_dir.join("_curand.rs")).ok();
+  let builder = bindgen::Builder::default();
+  if let Some(ref cuda_dir) = maybe_cuda_dir {
+    let cuda_include_dir = cuda_dir.join("include");
+    builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+  } else {
+    builder
+  }
+    .header("wrapped_curand.h")
+    .whitelist_recursively(false)
+    .whitelist_type("curandStatus")
+    .whitelist_type("curandStatus_t")
+    .whitelist_type("curandGenerator_st")
+    .whitelist_type("curandGenerator_t")
+    .whitelist_type("curandRngType")
+    .whitelist_type("curandRngType_t")
+    .whitelist_type("curandDiscreteDistribution_st")
+    .whitelist_type("curandDiscreteDistribution_t")
+    .whitelist_type("curandDirectionVectors32_t")
+    .whitelist_type("curandDirectionVectors64_t")
+    .whitelist_type("curandDirectionVectorSet")
+    .whitelist_type("curandDirectionVectorSet_t")
+    .whitelist_type("curandOrdering")
+    .whitelist_type("curandOrdering_t")
+    .whitelist_function("curandCreateGenerator")
+    .whitelist_function("curandCreateGeneratorHost")
+    .whitelist_function("curandCreatePoissonDistribution")
+    .whitelist_function("curandDestroyDistribution")
+    .whitelist_function("curandDestroyGenerator")
+    .whitelist_function("curandGenerate")
+    .whitelist_function("curandGenerateLogNormal")
+    .whitelist_function("curandGenerateLogNormalDouble")
+    .whitelist_function("curandGenerateLongLong")
+    .whitelist_function("curandGenerateNormal")
+    .whitelist_function("curandGenerateNormalDouble")
+    .whitelist_function("curandGeneratePoisson")
+    .whitelist_function("curandGenerateSeeds")
+    .whitelist_function("curandGenerateUniform")
+    .whitelist_function("curandGenerateUniformDouble")
+    .whitelist_function("curandGetDirectionVectors32")
+    .whitelist_function("curandGetDirectionVectors64")
+    .whitelist_function("curandGetProperty")
+    .whitelist_function("curandGetScrambleConstants32")
+    .whitelist_function("curandGetScrambleConstants64")
+    .whitelist_function("curandGetStream")
+    .whitelist_function("curandGetVersion")
+    .whitelist_function("curandSetGeneratorOffset")
+    .whitelist_function("curandSetGeneratorOrdering")
+    .whitelist_function("curandSetPseudoRandomGeneratorSeed")
+    .whitelist_function("curandSetQuasiRandomGeneratorDimensions")
+    .whitelist_function("curandSetStream")
+    .prepend_enum_name(false)
+    .generate_comments(false)
+    .rustfmt_bindings(true)
+    .generate()
+    .expect("bindgen failed to generate curand bindings")
+    .write_to_file(gensrc_dir.join("_curand.rs"))
+    .expect("bindgen failed to write curand bindings");
+
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_driver_types.rs").display());
   fs::remove_file(gensrc_dir.join("_driver_types.rs")).ok();
   let builder = bindgen::Builder::default();
@@ -371,6 +433,9 @@ fn main() {
       .whitelist_recursively(false)
       .whitelist_type("cudaDataType")
       .whitelist_type("cudaDataType_t")
+      .whitelist_type("libraryPropertyType")
+      .whitelist_type("libraryPropertyType_t")
+      .prepend_enum_name(false)
       .generate_comments(false)
       .rustfmt_bindings(true)
       .generate()
