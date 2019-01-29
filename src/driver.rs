@@ -24,7 +24,7 @@ pub fn cuda_init() {
   }
 }
 
-pub type CuResult<T> = Result<T, CUresult>;
+pub type CuResult<T=()> = Result<T, CUresult>;
 
 pub fn get_version() -> CuResult<i32> {
   let mut version: c_int = -1;
