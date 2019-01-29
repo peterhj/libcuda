@@ -23,6 +23,28 @@ fn main() {
   compile_error!("a cuda version feature must be enabled");
 }
 
+fn to_cuda_lib_dir(cuda_dir: &PathBuf) -> PathBuf {
+  if cfg!(target_os = "linux") {
+    if cfg!(target_arch = "x86_64") {
+      cuda_dir.join("lib64")
+    } else if cfg!(target_arch = "powerpc64le") {
+      panic!("todo: ppc64le support on linux is not yet implemented");
+    } else {
+      panic!("unsupported target arch on linux");
+    }
+  } else if cfg!(target_os = "windows") {
+    if cfg!(target_arch = "x86_64") {
+      cuda_dir.join("lib").join("x64")
+    } else {
+      panic!("unsupported target arch on windows");
+    }
+  } else if cfg!(target_os = "macos") {
+    unimplemented!();
+  } else {
+    panic!("unsupported target os");
+  }
+}
+
 #[cfg(all(
     not(feature = "fresh"),
     any(
@@ -38,6 +60,9 @@ fn main() {
 ))]
 fn main() {
   println!("cargo:rerun-if-changed=build.rs");
+  println!("cargo:rerun-if-env-changed=CUDA_HOME");
+  println!("cargo:rerun-if-env-changed=CUDA_PATH");
+  println!("cargo:rerun-if-env-changed=CUDA_LIBRARY_PATH");
   println!("cargo:rustc-link-lib=cuda");
   println!("cargo:rustc-link-lib=cudart");
   println!("cargo:rustc-link-lib=curand");
@@ -46,10 +71,12 @@ fn main() {
       env::var("CUDA_HOME")
         .or_else(|_| env::var("CUDA_PATH"))
         .ok().map(|s| PathBuf::from(s));
+  let maybe_cuda_fallback_lib_dir =
+      maybe_cuda_dir.as_ref().map(|d| to_cuda_lib_dir(d));
   let maybe_cuda_lib_dir =
       env::var("CUDA_LIBRARY_PATH")
         .ok().map(|s| PathBuf::from(s))
-        .or_else(|| maybe_cuda_dir.map(|d| d.join("lib64")));
+        .or_else(|| maybe_cuda_fallback_lib_dir);
   if let Some(cuda_lib_dir) = maybe_cuda_lib_dir {
     println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
   }
@@ -58,6 +85,9 @@ fn main() {
 #[cfg(feature = "fresh")]
 fn main() {
   println!("cargo:rerun-if-changed=build.rs");
+  println!("cargo:rerun-if-env-changed=CUDA_HOME");
+  println!("cargo:rerun-if-env-changed=CUDA_PATH");
+  println!("cargo:rerun-if-env-changed=CUDA_LIBRARY_PATH");
   println!("cargo:rustc-link-lib=cuda");
   println!("cargo:rustc-link-lib=cudart");
   println!("cargo:rustc-link-lib=curand");
@@ -67,7 +97,8 @@ fn main() {
       env::var("CUDA_HOME")
         .or_else(|_| env::var("CUDA_PATH"))
         .ok().map(|s| PathBuf::from(s));
-  let maybe_cuda_fallback_lib_dir = maybe_cuda_dir.as_ref().map(|d| d.join("lib64"));
+  let maybe_cuda_fallback_lib_dir =
+      maybe_cuda_dir.as_ref().map(|d| to_cuda_lib_dir(d));
   let maybe_cuda_lib_dir =
       env::var("CUDA_LIBRARY_PATH")
         .ok().map(|s| PathBuf::from(s))
@@ -75,6 +106,9 @@ fn main() {
   if let Some(cuda_lib_dir) = maybe_cuda_lib_dir {
     println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
   }
+
+  let maybe_cuda_include_dir =
+      maybe_cuda_dir.as_ref().map(|d| d.join("include"));
 
   #[cfg(feature = "cuda_6_5")]
   let a_cuda_version_feature_must_be_enabled = "v6_5";
@@ -102,8 +136,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda").display());
   fs::remove_file(gensrc_dir.join("_cuda.rs")).ok();
   let builder = bindgen::Builder::default();
-  if let Some(ref cuda_dir) = maybe_cuda_dir {
-    let cuda_include_dir = cuda_dir.join("include");
+  if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
     builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
   } else {
     builder
@@ -221,8 +254,7 @@ fn main() {
     println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda_fp16.rs").display());
     fs::remove_file(gensrc_dir.join("_cuda_fp16.rs")).ok();
     let builder = bindgen::Builder::default();
-    if let Some(ref cuda_dir) = maybe_cuda_dir {
-      let cuda_include_dir = cuda_dir.join("include");
+    if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
       builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
     } else {
       builder
@@ -244,8 +276,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda_runtime_api.rs").display());
   fs::remove_file(gensrc_dir.join("_cuda_runtime_api.rs")).ok();
   let builder = bindgen::Builder::default();
-  if let Some(ref cuda_dir) = maybe_cuda_dir {
-    let cuda_include_dir = cuda_dir.join("include");
+  if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
     builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
   } else {
     builder
@@ -333,8 +364,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_driver_types.rs").display());
   fs::remove_file(gensrc_dir.join("_driver_types.rs")).ok();
   let builder = bindgen::Builder::default();
-  if let Some(ref cuda_dir) = maybe_cuda_dir {
-    let cuda_include_dir = cuda_dir.join("include");
+  if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
     builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
   } else {
     builder
@@ -365,8 +395,7 @@ fn main() {
     println!("cargo:rerun-if-changed={}", gensrc_dir.join("_library_types.rs").display());
     fs::remove_file(gensrc_dir.join("_library_types.rs")).ok();
     let builder = bindgen::Builder::default();
-    if let Some(ref cuda_dir) = maybe_cuda_dir {
-      let cuda_include_dir = cuda_dir.join("include");
+    if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
       builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
     } else {
       builder
@@ -389,8 +418,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_curand.rs").display());
   fs::remove_file(gensrc_dir.join("_curand.rs")).ok();
   let builder = bindgen::Builder::default();
-  if let Some(ref cuda_dir) = maybe_cuda_dir {
-    let cuda_include_dir = cuda_dir.join("include");
+  if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
     builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
   } else {
     builder
@@ -449,8 +477,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cublas.rs").display());
   fs::remove_file(gensrc_dir.join("_cublas.rs")).ok();
   let builder = bindgen::Builder::default();
-  if let Some(ref cuda_dir) = maybe_cuda_dir {
-    let cuda_include_dir = cuda_dir.join("include");
+  if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
     builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
   } else {
     builder
