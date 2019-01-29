@@ -75,9 +75,11 @@ fn main() {
       maybe_cuda_dir.as_ref().map(|d| to_cuda_lib_dir(d));
   let maybe_cuda_lib_dir =
       env::var("CUDA_LIBRARY_PATH")
-        .ok().map(|s| PathBuf::from(s))
-        .or_else(|| maybe_cuda_fallback_lib_dir);
+        .ok().map(|s| PathBuf::from(s));
   if let Some(cuda_lib_dir) = maybe_cuda_lib_dir {
+    println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
+  }
+  if let Some(cuda_lib_dir) = maybe_cuda_fallback_lib_dir {
     println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
   }
 }
@@ -101,9 +103,12 @@ fn main() {
       maybe_cuda_dir.as_ref().map(|d| to_cuda_lib_dir(d));
   let maybe_cuda_lib_dir =
       env::var("CUDA_LIBRARY_PATH")
-        .ok().map(|s| PathBuf::from(s))
-        .or_else(|| maybe_cuda_fallback_lib_dir);
+        .ok().map(|s| PathBuf::from(s));
+
   if let Some(cuda_lib_dir) = maybe_cuda_lib_dir {
+    println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
+  }
+  if let Some(cuda_lib_dir) = maybe_cuda_fallback_lib_dir {
     println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
   }
 
