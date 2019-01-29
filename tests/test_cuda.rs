@@ -1,6 +1,6 @@
 extern crate cuda;
 
-use cuda::*;
+use cuda::driver::*;
 
 #[test]
 fn test_init() {

@@ -1,6 +1,6 @@
-use crate::ffi::*;
+#![allow(non_upper_case_globals)]
 
-use cuda_api_types::cuda::*;
+use crate::ffi::cuda::*;
 
 use std::ffi::{CStr};
 use std::os::raw::{c_int, c_void};

@@ -1,11 +1,9 @@
 #[cfg(feature = "fresh")]
 extern crate bindgen;
 
-#[cfg(feature = "fresh")]
 use std::env;
 #[cfg(feature = "fresh")]
 use std::fs;
-#[cfg(feature = "fresh")]
 use std::path::{PathBuf};
 
 #[cfg(all(
@@ -39,20 +37,40 @@ fn main() {
     )
 ))]
 fn main() {
+  println!("cargo:rerun-if-changed=build.rs");
   println!("cargo:rustc-link-lib=cuda");
+  println!("cargo:rustc-link-lib=cudart");
+  let maybe_cuda_dir =
+      env::var("CUDA_HOME")
+        .or_else(|_| env::var("CUDA_PATH"))
+        .ok().map(|s| PathBuf::from(s));
+  let maybe_cuda_lib_dir =
+      env::var("CUDA_LIBRARY_PATH")
+        .ok().map(|s| PathBuf::from(s))
+        .or_else(|| maybe_cuda_dir.map(|d| d.join("lib64")));
+  if let Some(cuda_lib_dir) = maybe_cuda_lib_dir {
+    println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
+  }
 }
 
 #[cfg(feature = "fresh")]
 fn main() {
+  println!("cargo:rerun-if-changed=build.rs");
   println!("cargo:rustc-link-lib=cuda");
+  println!("cargo:rustc-link-lib=cudart");
 
-  let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-  let cuda_dir = PathBuf::from(
+  let maybe_cuda_dir =
       env::var("CUDA_HOME")
         .or_else(|_| env::var("CUDA_PATH"))
-        .unwrap_or_else(|_| "/usr/local/cuda".to_owned())
-  );
-  let cuda_include_dir = cuda_dir.join("include");
+        .ok().map(|s| PathBuf::from(s));
+  let maybe_cuda_fallback_lib_dir = maybe_cuda_dir.as_ref().map(|d| d.join("lib64"));
+  let maybe_cuda_lib_dir =
+      env::var("CUDA_LIBRARY_PATH")
+        .ok().map(|s| PathBuf::from(s))
+        .or_else(|| maybe_cuda_fallback_lib_dir);
+  if let Some(cuda_lib_dir) = maybe_cuda_lib_dir {
+    println!("cargo:rustc-link-search=native={}", cuda_lib_dir.display());
+  }
 
   #[cfg(feature = "cuda_6_5")]
   let a_cuda_version_feature_must_be_enabled = "v6_5";
@@ -72,16 +90,48 @@ fn main() {
   let a_cuda_version_feature_must_be_enabled = "v10_0";
   let v = a_cuda_version_feature_must_be_enabled;
 
+  let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
   let gensrc_dir = manifest_dir.join("gensrc").join("ffi").join(v);
   println!("cargo:rerun-if-changed={}", gensrc_dir.display());
   fs::create_dir_all(&gensrc_dir).ok();
 
   println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda").display());
   fs::remove_file(gensrc_dir.join("_cuda.rs")).ok();
-  bindgen::Builder::default()
-    .clang_arg(format!("-I{}", cuda_include_dir.as_os_str().to_str().unwrap()))
+  let builder = bindgen::Builder::default();
+  if let Some(ref cuda_dir) = maybe_cuda_dir {
+    let cuda_include_dir = cuda_dir.join("include");
+    builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+  } else {
+    builder
+  }
     .header("wrapped_cuda.h")
     .whitelist_recursively(false)
+    .whitelist_var("__CUDA_API_VERSION")
+    .whitelist_var("CUDA_VERSION")
+    .whitelist_type("cudaError_enum")
+    .whitelist_type("CUresult")
+    .whitelist_type("CUdevice")
+    .whitelist_type("CUdevice_attribute")
+    .whitelist_type("CUdevice_attribute_enum")
+    .whitelist_type("CUuuid_st")
+    .whitelist_type("CUuuid")
+    .whitelist_type("CUctx_st")
+    .whitelist_type("CUcontext")
+    .whitelist_type("CUstream_st")
+    .whitelist_type("CUstream")
+    .whitelist_type("CUstreamCallback")
+    .whitelist_type("CUevent_st")
+    .whitelist_type("CUevent")
+    .whitelist_type("CUdeviceptr")
+    .whitelist_type("CUjit_option_enum")
+    .whitelist_type("CUjit_option")
+    .whitelist_type("CUmod_st")
+    .whitelist_type("CUmodule")
+    .whitelist_type("CUhostFn")
+    .whitelist_type("CUfunc_st")
+    .whitelist_type("CUfunction")
+    .whitelist_type("CUDA_LAUNCH_PARAMS_st")
+    .whitelist_type("CUDA_LAUNCH_PARAMS")
     .whitelist_function("cuGetErrorName")
     .whitelist_function("cuGetErrorString")
     .whitelist_function("cuInit")
@@ -162,4 +212,170 @@ fn main() {
     .expect("bindgen failed to generate driver bindings")
     .write_to_file(gensrc_dir.join("_cuda.rs"))
     .expect("bindgen failed to write driver bindings");
+
+  if cfg!(feature = "cuda_gte_9_0") {
+    println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda_fp16.rs").display());
+    fs::remove_file(gensrc_dir.join("_cuda_fp16.rs")).ok();
+    let builder = bindgen::Builder::default();
+    if let Some(ref cuda_dir) = maybe_cuda_dir {
+      let cuda_include_dir = cuda_dir.join("include");
+      builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+    } else {
+      builder
+    }
+      .clang_arg("-x").clang_arg("c++")
+      .clang_arg("-std=c++11")
+      .header("wrapped_cuda_fp16.h")
+      .whitelist_recursively(false)
+      .whitelist_type("__half")
+      .whitelist_type("__half2")
+      .generate_comments(false)
+      .rustfmt_bindings(true)
+      .generate()
+      .expect("bindgen failed to generate fp16 bindings")
+      .write_to_file(gensrc_dir.join("_cuda_fp16.rs"))
+      .expect("bindgen failed to write fp16 bindings");
+  }
+
+  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda_runtime_api.rs").display());
+  fs::remove_file(gensrc_dir.join("_cuda_runtime_api.rs")).ok();
+  let builder = bindgen::Builder::default();
+  if let Some(ref cuda_dir) = maybe_cuda_dir {
+    let cuda_include_dir = cuda_dir.join("include");
+    builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+  } else {
+    builder
+  }
+    .header("wrapped_cuda_runtime_api.h")
+    .whitelist_recursively(false)
+    .whitelist_type("cudaStreamCallback_t")
+    // Device management.
+    .whitelist_function("cudaDeviceReset")
+    .whitelist_function("cudaDeviceSynchronize")
+    .whitelist_function("cudaGetDeviceCount")
+    .whitelist_function("cudaGetDevice")
+    .whitelist_function("cudaGetDeviceFlags")
+    .whitelist_function("cudaGetDeviceProperties")
+    .whitelist_function("cudaDeviceGetAttribute")
+    .whitelist_function("cudaSetDevice")
+    .whitelist_function("cudaSetDeviceFlags")
+    // Error handling.
+    .whitelist_function("cudaGetErrorString")
+    // Stream management.
+    .whitelist_function("cudaStreamCreate")
+    .whitelist_function("cudaStreamCreateWithFlags")
+    .whitelist_function("cudaStreamCreateWithPriority")
+    .whitelist_function("cudaStreamDestroy")
+    .whitelist_function("cudaStreamAddCallback")
+    .whitelist_function("cudaStreamAttachMemAsync")
+    .whitelist_function("cudaStreamQuery")
+    .whitelist_function("cudaStreamSynchronize")
+    .whitelist_function("cudaStreamWaitEvent")
+    // Event management.
+    .whitelist_function("cudaEventCreate")
+    .whitelist_function("cudaEventCreateWithFlags")
+    .whitelist_function("cudaEventDestroy")
+    .whitelist_function("cudaEventElapsedTime")
+    .whitelist_function("cudaEventQuery")
+    .whitelist_function("cudaEventRecord")
+    .whitelist_function("cudaEventSynchronize")
+    // Memory management.
+    .whitelist_function("cudaMalloc")
+    .whitelist_function("cudaFree")
+    .whitelist_function("cudaMallocHost")
+    .whitelist_function("cudaFreeHost")
+    .whitelist_function("cudaHostAlloc")
+    .whitelist_function("cudaHostGetDevicePointer")
+    .whitelist_function("cudaHostGetFlags")
+    .whitelist_function("cudaHostRegister")
+    .whitelist_function("cudaHostUnregister")
+    .whitelist_function("cudaMallocManaged")
+    .whitelist_function("cudaMemAdvise")
+    .whitelist_function("cudaMemPrefetchAsync")
+    .whitelist_function("cudaMemRangeGetAttribute")
+    .whitelist_function("cudaMemRangeGetAttributes")
+    .whitelist_function("cudaMemcpy")
+    .whitelist_function("cudaMemcpyAsync")
+    .whitelist_function("cudaMemcpy2D")
+    .whitelist_function("cudaMemcpy2DAsync")
+    .whitelist_function("cudaMemcpyPeer")
+    .whitelist_function("cudaMemcpyPeerAsync")
+    .whitelist_function("cudaMemset")
+    .whitelist_function("cudaMemsetAsync")
+    // Peer device memory access.
+    .whitelist_function("cudaDeviceCanAccessPeer")
+    .whitelist_function("cudaDeviceDisablePeerAccess")
+    .whitelist_function("cudaDeviceEnablePeerAccess")
+    // OpenGL interoperability.
+    .whitelist_function("cudaGLGetDevices")
+    .whitelist_function("cudaGraphicsGLRegisterBuffer")
+    .whitelist_function("cudaGraphicsGLRegisterImage")
+    // Graphics interoperability.
+    .whitelist_function("cudaGraphicsMapResources")
+    .whitelist_function("cudaGraphicsResourceGetMappedPointer")
+    .whitelist_function("cudaGraphicsResourceSetMapFlags")
+    .whitelist_function("cudaGraphicsUnmapResources")
+    .whitelist_function("cudaGraphicsUnregisterResource")
+    // Version management.
+    .whitelist_function("cudaDriverGetVersion")
+    .whitelist_function("cudaRuntimeGetVersion")
+    .generate_comments(false)
+    .rustfmt_bindings(true)
+    .generate()
+    .expect("bindgen failed to generate runtime bindings")
+    .write_to_file(gensrc_dir.join("_cuda_runtime_api.rs"))
+    .expect("bindgen failed to write runtime bindings");
+
+  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_driver_types.rs").display());
+  fs::remove_file(gensrc_dir.join("_driver_types.rs")).ok();
+  let builder = bindgen::Builder::default();
+  if let Some(ref cuda_dir) = maybe_cuda_dir {
+    let cuda_include_dir = cuda_dir.join("include");
+    builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+  } else {
+    builder
+  }
+    .header("wrapped_driver_types.h")
+    .whitelist_recursively(false)
+    .whitelist_type("cudaError")
+    .whitelist_type("cudaError_t")
+    .whitelist_type("cudaDeviceAttr")
+    .whitelist_type("cudaUUID_t")
+    .whitelist_type("cudaDeviceProp")
+    .whitelist_type("cudaStream_t")
+    .whitelist_type("cudaEvent_t")
+    .whitelist_type("cudaMemoryAdvise")
+    .whitelist_type("cudaMemcpyKind")
+    .whitelist_type("cudaMemRangeAttribute")
+    .whitelist_type("cudaGLDeviceList")
+    .whitelist_type("cudaGraphicsResource")
+    .whitelist_type("cudaGraphicsResource_t")
+    .generate_comments(false)
+    .rustfmt_bindings(true)
+    .generate()
+    .expect("bindgen failed to generate driver types bindings")
+    .write_to_file(gensrc_dir.join("_driver_types.rs"))
+    .expect("bindgen failed to write driver types bindings");
+
+  if cfg!(feature = "cuda_gte_8_0") {
+    println!("cargo:rerun-if-changed={}", gensrc_dir.join("_library_types.rs").display());
+    fs::remove_file(gensrc_dir.join("_library_types.rs")).ok();
+    let builder = bindgen::Builder::default();
+    if let Some(ref cuda_dir) = maybe_cuda_dir {
+      let cuda_include_dir = cuda_dir.join("include");
+      builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+    } else {
+      builder
+    }
+      .header("wrapped_library_types.h")
+      .whitelist_recursively(false)
+      .whitelist_type("cudaDataType")
+      .whitelist_type("cudaDataType_t")
+      .generate_comments(false)
+      .rustfmt_bindings(true)
+      .generate()
+      .expect("bindgen failed to generate library types bindings")
+      .write_to_file(gensrc_dir.join("_library_types.rs"))
+      .expect("bindgen failed to write library types bindings");
+  }
 }

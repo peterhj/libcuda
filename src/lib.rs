@@ -1,13 +1,4 @@
-#![allow(non_upper_case_globals)]
-
-extern crate cuda_api_types;
-
-pub use crate::driver::{
-  CuModule,
-  is_cuda_initialized,
-  cuda_init,
-  get_version,
-};
+#[macro_use] extern crate static_assertions;
 
 pub mod driver;
 pub mod ffi;
