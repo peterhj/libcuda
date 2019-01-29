@@ -2,6 +2,8 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 
+#[cfg(feature = "cuda_gte_10_0")]
+pub use self::v::cublas;
 pub use self::v::cuda;
 #[cfg(feature = "cuda_gte_8_0")]
 pub use self::v::cuda_fp16;
@@ -106,6 +108,9 @@ mod v {
 
 #[cfg(feature = "cuda_10_0")]
 mod v {
+  pub mod cublas            { use crate::ffi::driver_types::*;
+                              use crate::ffi::library_types::*;
+                              include!("v10_0/_cublas.rs"); }
   pub mod cuda              { include!("v10_0/_cuda.rs"); }
   pub mod cuda_fp16         { include!("v10_0/_cuda_fp16.rs"); }
   pub mod cuda_runtime_api  { use crate::ffi::driver_types::*;
