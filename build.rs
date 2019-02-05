@@ -138,7 +138,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", gensrc_dir.display());
   fs::create_dir_all(&gensrc_dir).ok();
 
-  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda").display());
+  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda.rs").display());
   fs::remove_file(gensrc_dir.join("_cuda.rs")).ok();
   let builder = bindgen::Builder::default();
   if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -267,7 +267,11 @@ fn main() {
       .clang_arg("-x").clang_arg("c++")
       .clang_arg("-std=c++11")
       .header("wrapped_cuda_fp16.h")
-      .whitelist_recursively(false)
+      // NB: `whitelist_recursively(false)` and `derive_copy(true)` still
+      // not compatible, see:
+      // https://github.com/rust-lang/rust-bindgen/issues/1454
+      //.whitelist_recursively(false)
+      .derive_copy(true)
       .whitelist_type("__half")
       .whitelist_type("__half2")
       .generate_comments(false)
@@ -331,6 +335,7 @@ fn main() {
     .whitelist_function("cudaHostUnregister")
     .whitelist_function("cudaMallocManaged")
     .whitelist_function("cudaMemAdvise")
+    .whitelist_function("cudaMemGetInfo")
     .whitelist_function("cudaMemPrefetchAsync")
     .whitelist_function("cudaMemRangeGetAttribute")
     .whitelist_function("cudaMemRangeGetAttributes")

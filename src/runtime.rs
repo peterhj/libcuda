@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 
+use crate::extras::{MemInfo};
 use crate::ffi::cuda_runtime_api::*;
 use crate::ffi::driver_types::*;
 
@@ -8,7 +9,7 @@ use std::mem::{size_of, zeroed};
 use std::os::raw::{c_void, c_int, c_uint};
 use std::ptr::{null_mut};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct CudaError(pub cudaError_t);
 
 impl CudaError {
@@ -24,7 +25,7 @@ impl CudaError {
     }
     let cs = unsafe { CStr::from_ptr(raw_s) };
     let s = match cs.to_str() {
-      Err(_) => "(invalid utf8)",
+      Err(_) => "(invalid utf-8)",
       Ok(s) => s,
     };
     s.to_owned()
@@ -55,7 +56,7 @@ pub fn get_runtime_version() -> CudaResult<i32> {
   }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct CudaDevice(pub i32);
 
 impl CudaDevice {
@@ -180,6 +181,18 @@ impl CudaDevice {
       e => Err(CudaError(e)),
     }
   }
+
+  /// Returns the free and total device memory in bytes for the current device.
+  ///
+  /// Corresponds to `cudaMemGetInfo`.
+  pub fn get_mem_info_current() -> CudaResult<MemInfo> {
+    let mut free: usize = 0;
+    let mut total: usize = 0;
+    match unsafe { cudaMemGetInfo(&mut free as *mut _, &mut total as *mut _) } {
+      cudaError_cudaSuccess => Ok(MemInfo{free, total}),
+      e => Err(CudaError(e)),
+    }
+  }
 }
 
 #[derive(Debug)]
@@ -214,7 +227,7 @@ impl CudaStream {
     CudaStream{ptr: null_mut()}
   }
 
-  pub fn create() -> CudaResult<CudaStream> {
+  pub fn create_current() -> CudaResult<CudaStream> {
     let mut ptr: cudaStream_t = null_mut();
     match unsafe { cudaStreamCreate(&mut ptr as *mut cudaStream_t) } {
       cudaError_cudaSuccess => Ok(CudaStream{ptr: ptr}),
@@ -222,7 +235,7 @@ impl CudaStream {
     }
   }
 
-  pub fn as_mut_ptr(&self) -> cudaStream_t {
+  pub fn as_raw(&self) -> cudaStream_t {
     self.ptr
   }
 
@@ -245,7 +258,7 @@ impl CudaStream {
   }
 
   pub fn wait_event(&mut self, event: &mut CudaEvent) -> CudaResult {
-    match unsafe { cudaStreamWaitEvent(self.ptr, event.as_mut_ptr(), 0) } {
+    match unsafe { cudaStreamWaitEvent(self.ptr, event.as_raw(), 0) } {
       cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e))
     }
@@ -286,7 +299,7 @@ impl Drop for CudaEvent {
 }
 
 impl CudaEvent {
-  pub fn create() -> CudaResult<CudaEvent> {
+  pub fn create_current() -> CudaResult<CudaEvent> {
     let mut ptr = null_mut() as cudaEvent_t;
     match unsafe { cudaEventCreate(&mut ptr as *mut cudaEvent_t) } {
       cudaError_cudaSuccess => Ok(CudaEvent{ptr: ptr}),
@@ -294,15 +307,15 @@ impl CudaEvent {
     }
   }
 
-  pub fn create_blocking() -> CudaResult<CudaEvent> {
-    Self::create_with_flags(0x01)
+  pub fn blocking_current() -> CudaResult<CudaEvent> {
+    Self::create_current_with_flags(0x01)
   }
 
-  pub fn create_fastest() -> CudaResult<CudaEvent> {
-    Self::create_with_flags(0x02)
+  pub fn fastest_current() -> CudaResult<CudaEvent> {
+    Self::create_current_with_flags(0x02)
   }
 
-  pub fn create_with_flags(flags: u32) -> CudaResult<CudaEvent> {
+  pub fn create_current_with_flags(flags: u32) -> CudaResult<CudaEvent> {
     let mut ptr = null_mut() as cudaEvent_t;
     match unsafe { cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags) } {
       cudaError_cudaSuccess => Ok(CudaEvent{ptr: ptr}),
@@ -310,7 +323,7 @@ impl CudaEvent {
     }
   }
 
-  pub fn as_mut_ptr(&self) -> cudaEvent_t {
+  pub fn as_raw(&self) -> cudaEvent_t {
     self.ptr
   }
 
@@ -327,7 +340,7 @@ impl CudaEvent {
   }
 
   pub fn record(&mut self, stream: &mut CudaStream) -> CudaResult {
-    match unsafe { cudaEventRecord(self.ptr, stream.as_mut_ptr()) } {
+    match unsafe { cudaEventRecord(self.ptr, stream.as_raw()) } {
       cudaError_cudaSuccess => Ok(()),
       e => Err(CudaError(e)),
     }
@@ -379,7 +392,7 @@ pub unsafe fn cuda_memset(dptr: *mut u8, value: i32, size: usize) -> CudaResult 
 }
 
 pub unsafe fn cuda_memset_async(dptr: *mut u8, value: i32, size: usize, stream: &mut CudaStream) -> CudaResult {
-  match cudaMemsetAsync(dptr as *mut c_void, value, size, stream.as_mut_ptr()) {
+  match cudaMemsetAsync(dptr as *mut c_void, value, size, stream.as_raw()) {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
   }
@@ -437,7 +450,7 @@ where T: Copy + 'static
       src as *const c_void,
       len * size_of::<T>(),
       kind.to_raw(),
-      stream.as_mut_ptr())
+      stream.as_raw())
   {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
@@ -466,7 +479,7 @@ where T: Copy + 'static
       width_bytes,
       height,
       kind.to_raw(),
-      stream.as_mut_ptr())
+      stream.as_raw())
   {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),
@@ -488,7 +501,7 @@ where T: Copy + 'static
       src as *const c_void,
       src_device_idx,
       len * size_of::<T>(),
-      stream.as_mut_ptr())
+      stream.as_raw())
   {
     cudaError_cudaSuccess => Ok(()),
     e => Err(CudaError(e)),

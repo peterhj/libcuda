@@ -4,9 +4,9 @@ use cuda::driver::*;
 
 #[test]
 fn test_init() {
-  assert!(!is_cuda_initialized());
+  assert!(!cuda_initialized());
   cuda_init();
-  assert!(is_cuda_initialized());
+  assert!(cuda_initialized());
 }
 
 #[test]

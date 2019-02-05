@@ -2,6 +2,7 @@
 // Instead of deferring to bindgen, write and test manual bindings.
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct __half {
   pub x: ::std::os::raw::c_ushort,
 }
@@ -19,6 +20,7 @@ fn nonbindgen_test_layout___half() {
 }
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct __half2 {
   pub x: ::std::os::raw::c_uint,
 }
