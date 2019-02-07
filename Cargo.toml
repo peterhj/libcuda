@@ -26,9 +26,11 @@ cuda_gte_9_0    = []
 cuda_gte_9_1    = []
 cuda_gte_9_2    = []
 cuda_gte_10_0   = []
+cuda_sys        = ["cuda-sys"]
 
 [build-dependencies]
 bindgen = { version = "^0.47", optional = true }
 
 [dependencies]
+cuda-sys = { git = "https://github.com/rust-cuda/cuda-sys", optional = true }
 static_assertions = "0.3.1"
