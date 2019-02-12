@@ -135,10 +135,8 @@ fn main() {
 
   let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
   let gensrc_dir = manifest_dir.join("gensrc").join("ffi").join(v);
-  println!("cargo:rerun-if-changed={}", gensrc_dir.display());
   fs::create_dir_all(&gensrc_dir).ok();
 
-  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda.rs").display());
   fs::remove_file(gensrc_dir.join("_cuda.rs")).ok();
   let builder = bindgen::Builder::default();
   if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -249,6 +247,7 @@ fn main() {
     .whitelist_function("cuLaunchHostFunc")
     .whitelist_function("cuLaunchKernel")
     .generate_comments(false)
+    .prepend_enum_name(false)
     .rustfmt_bindings(true)
     .generate()
     .expect("bindgen failed to generate driver bindings")
@@ -256,7 +255,6 @@ fn main() {
     .expect("bindgen failed to write driver bindings");
 
   if cfg!(feature = "cuda_gte_9_0") {
-    println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda_fp16.rs").display());
     fs::remove_file(gensrc_dir.join("_cuda_fp16.rs")).ok();
     let builder = bindgen::Builder::default();
     if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -282,7 +280,6 @@ fn main() {
       .expect("bindgen failed to write fp16 bindings");
   }
 
-  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cuda_runtime_api.rs").display());
   fs::remove_file(gensrc_dir.join("_cuda_runtime_api.rs")).ok();
   let builder = bindgen::Builder::default();
   if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -371,7 +368,6 @@ fn main() {
     .write_to_file(gensrc_dir.join("_cuda_runtime_api.rs"))
     .expect("bindgen failed to write runtime bindings");
 
-  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_driver_types.rs").display());
   fs::remove_file(gensrc_dir.join("_driver_types.rs")).ok();
   let builder = bindgen::Builder::default();
   if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -395,6 +391,7 @@ fn main() {
     .whitelist_type("cudaGraphicsResource")
     .whitelist_type("cudaGraphicsResource_t")
     .generate_comments(false)
+    .prepend_enum_name(false)
     .rustfmt_bindings(true)
     .generate()
     .expect("bindgen failed to generate driver types bindings")
@@ -402,7 +399,6 @@ fn main() {
     .expect("bindgen failed to write driver types bindings");
 
   if cfg!(feature = "cuda_gte_8_0") {
-    println!("cargo:rerun-if-changed={}", gensrc_dir.join("_library_types.rs").display());
     fs::remove_file(gensrc_dir.join("_library_types.rs")).ok();
     let builder = bindgen::Builder::default();
     if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -416,8 +412,8 @@ fn main() {
       .whitelist_type("cudaDataType_t")
       .whitelist_type("libraryPropertyType")
       .whitelist_type("libraryPropertyType_t")
-      .prepend_enum_name(false)
       .generate_comments(false)
+      .prepend_enum_name(false)
       .rustfmt_bindings(true)
       .generate()
       .expect("bindgen failed to generate library types bindings")
@@ -425,7 +421,6 @@ fn main() {
       .expect("bindgen failed to write library types bindings");
   }
 
-  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_curand.rs").display());
   fs::remove_file(gensrc_dir.join("_curand.rs")).ok();
   let builder = bindgen::Builder::default();
   if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -476,15 +471,14 @@ fn main() {
     .whitelist_function("curandSetPseudoRandomGeneratorSeed")
     .whitelist_function("curandSetQuasiRandomGeneratorDimensions")
     .whitelist_function("curandSetStream")
-    .prepend_enum_name(false)
     .generate_comments(false)
+    .prepend_enum_name(false)
     .rustfmt_bindings(true)
     .generate()
     .expect("bindgen failed to generate curand bindings")
     .write_to_file(gensrc_dir.join("_curand.rs"))
     .expect("bindgen failed to write curand bindings");
 
-  println!("cargo:rerun-if-changed={}", gensrc_dir.join("_cublas.rs").display());
   fs::remove_file(gensrc_dir.join("_cublas.rs")).ok();
   let builder = bindgen::Builder::default();
   if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
@@ -531,8 +525,8 @@ fn main() {
     .whitelist_function("cublasSgemv_v2")
     .whitelist_function("cublasSgemm_v2")
     .whitelist_function("cublasGemmEx")
-    .prepend_enum_name(false)
     .generate_comments(false)
+    .prepend_enum_name(false)
     .rustfmt_bindings(true)
     .generate()
     .expect("bindgen failed to generate cublas bindings")

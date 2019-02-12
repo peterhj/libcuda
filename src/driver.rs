@@ -10,7 +10,7 @@ use std::ptr::{null, null_mut};
 pub fn get_version() -> CuResult<i32> {
   let mut version: c_int = -1;
   match unsafe { cuDriverGetVersion(&mut version as *mut c_int) } {
-    cudaError_enum_CUDA_SUCCESS => Ok(version),
+    CUDA_SUCCESS => Ok(version),
     e => Err(CuError(e)),
   }
 }
@@ -33,8 +33,8 @@ impl CuError {
   pub fn get_name(&self) -> &'static str {
     let mut sp: *const c_char = null();
     match unsafe { cuGetErrorName(self.0, &mut sp as *mut *const c_char) } {
-      cudaError_enum_CUDA_SUCCESS => {}
-      cudaError_enum_CUDA_ERROR_INVALID_VALUE => {
+      CUDA_SUCCESS => {}
+      CUDA_ERROR_INVALID_VALUE => {
         return "(invalid CUresult)";
       }
       e => panic!("cuGetErrorName failed: {}", e),
@@ -50,8 +50,8 @@ impl CuError {
   pub fn get_desc(&self) -> &'static str {
     let mut sp: *const c_char = null();
     match unsafe { cuGetErrorString(self.0, &mut sp as *mut *const c_char) } {
-      cudaError_enum_CUDA_SUCCESS => {}
-      cudaError_enum_CUDA_ERROR_INVALID_VALUE => {
+      CUDA_SUCCESS => {}
+      CUDA_ERROR_INVALID_VALUE => {
         return "(invalid CUresult)";
       }
       e => panic!("cuGetErrorString failed: {}", e),
@@ -71,8 +71,8 @@ pub fn cuda_initialized() -> bool {
   let mut count: i32 = 0;
   let result = unsafe { cuDeviceGetCount(&mut count as *mut c_int) };
   match result {
-    cudaError_enum_CUDA_SUCCESS => true,
-    cudaError_enum_CUDA_ERROR_NOT_INITIALIZED => false,
+    CUDA_SUCCESS => true,
+    CUDA_ERROR_NOT_INITIALIZED => false,
     e => panic!("cuDeviceGetCount failed: {:?}", CuError(e)),
   }
 }
@@ -80,7 +80,7 @@ pub fn cuda_initialized() -> bool {
 pub fn cuda_init() {
   let result = unsafe { cuInit(0) };
   match result {
-    cudaError_enum_CUDA_SUCCESS => {}
+    CUDA_SUCCESS => {}
     e => panic!("cuInit failed: {:?}", CuError(e)),
   }
 }
@@ -98,7 +98,7 @@ impl CuModule {
         &mut ptr as *mut CUmodule,
         module_path_cstr.as_ptr()) }
     {
-      cudaError_enum_CUDA_SUCCESS => Ok(CuModule{ptr}),
+      CUDA_SUCCESS => Ok(CuModule{ptr}),
       e => Err(CuError(e)),
     }
   }
@@ -109,7 +109,7 @@ impl CuModule {
         &mut ptr as *mut CUmodule,
         image.as_ptr() as *const c_void) }
     {
-      cudaError_enum_CUDA_SUCCESS => Ok(CuModule{ptr}),
+      CUDA_SUCCESS => Ok(CuModule{ptr}),
       e => Err(CuError(e)),
     }
   }
@@ -117,7 +117,7 @@ impl CuModule {
   pub fn unload(mut self) -> CuResult {
     assert!(!self.ptr.is_null());
     match unsafe { cuModuleUnload(self.ptr) } {
-      cudaError_enum_CUDA_SUCCESS => {
+      CUDA_SUCCESS => {
         self.ptr = null_mut();
         Ok(())
       }
