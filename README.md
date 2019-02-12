@@ -1,6 +1,6 @@
 These are Rust bindings to the CUDA toolkit APIs.
 
-[Documentation](https://peterhj.github.io/libcuda-docs/cuda/)
+[Documentation (master)](https://peterhj.github.io/libcuda-docs/cuda/)
 
 The FFI bindings are done via [bindgen](https://github.com/rust-lang/rust-bindgen)
 and are substantially whitelisted; see `build.rs` for the whitelisted APIs.
