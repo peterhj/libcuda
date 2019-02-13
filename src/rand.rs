@@ -21,7 +21,7 @@ impl fmt::Debug for CurandError {
 
 impl CurandError {
   pub fn get_code(&self) -> u32 {
-    self.0
+    self.0 as u32
   }
 
   pub fn get_name(&self) -> Option<&'static str> {

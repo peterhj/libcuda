@@ -37,7 +37,7 @@ impl CuError {
       CUDA_ERROR_INVALID_VALUE => {
         return "(invalid CUresult)";
       }
-      e => panic!("cuGetErrorName failed: {}", e),
+      e => panic!("cuGetErrorName failed: {:?}", e),
     }
     assert!(!sp.is_null());
     let s: &'static CStr = unsafe { CStr::from_ptr(sp) };
@@ -54,7 +54,7 @@ impl CuError {
       CUDA_ERROR_INVALID_VALUE => {
         return "(invalid CUresult)";
       }
-      e => panic!("cuGetErrorString failed: {}", e),
+      e => panic!("cuGetErrorString failed: {:?}", e),
     }
     assert!(!sp.is_null());
     let s: &'static CStr = unsafe { CStr::from_ptr(sp) };
