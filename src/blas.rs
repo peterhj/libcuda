@@ -134,6 +134,14 @@ impl CublasHandle {
     })
   }
 
+  pub fn as_raw(&self) -> cublasHandle_t {
+    self.ptr
+  }
+
+  pub fn ptr_eq(&self, other: &CublasHandle) -> bool {
+    self.ptr == other.ptr
+  }
+
   pub fn get_version(&mut self) -> CublasResult<i32> {
     let mut version: i32 = 0;
     let status = unsafe { cublasGetVersion_v2(

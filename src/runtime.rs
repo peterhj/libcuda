@@ -227,7 +227,7 @@ impl CudaStream {
     CudaStream{ptr: null_mut()}
   }
 
-  pub fn create_current() -> CudaResult<CudaStream> {
+  pub fn create() -> CudaResult<CudaStream> {
     let mut ptr: cudaStream_t = null_mut();
     match unsafe { cudaStreamCreate(&mut ptr as *mut cudaStream_t) } {
       cudaSuccess => Ok(CudaStream{ptr: ptr}),
@@ -299,7 +299,7 @@ impl Drop for CudaEvent {
 }
 
 impl CudaEvent {
-  pub fn create_current() -> CudaResult<CudaEvent> {
+  pub fn create() -> CudaResult<CudaEvent> {
     let mut ptr = null_mut() as cudaEvent_t;
     match unsafe { cudaEventCreate(&mut ptr as *mut cudaEvent_t) } {
       cudaSuccess => Ok(CudaEvent{ptr: ptr}),
@@ -307,15 +307,15 @@ impl CudaEvent {
     }
   }
 
-  pub fn blocking_current() -> CudaResult<CudaEvent> {
-    Self::create_current_with_flags(0x01)
+  pub fn blocking() -> CudaResult<CudaEvent> {
+    Self::create_with_flags(0x01)
   }
 
-  pub fn fastest_current() -> CudaResult<CudaEvent> {
-    Self::create_current_with_flags(0x02)
+  pub fn fastest() -> CudaResult<CudaEvent> {
+    Self::create_with_flags(0x02)
   }
 
-  pub fn create_current_with_flags(flags: u32) -> CudaResult<CudaEvent> {
+  pub fn create_with_flags(flags: u32) -> CudaResult<CudaEvent> {
     let mut ptr = null_mut() as cudaEvent_t;
     match unsafe { cudaEventCreateWithFlags(&mut ptr as *mut cudaEvent_t, flags) } {
       cudaSuccess => Ok(CudaEvent{ptr: ptr}),

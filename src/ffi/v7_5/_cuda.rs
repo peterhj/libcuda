@@ -24,6 +24,24 @@ pub struct CUfunc_st {
 pub type CUfunction = *mut CUfunc_st;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct CUarray_st {
+    _unused: [u8; 0],
+}
+pub type CUarray = *mut CUarray_st;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CUtexref_st {
+    _unused: [u8; 0],
+}
+pub type CUtexref = *mut CUtexref_st;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CUsurfref_st {
+    _unused: [u8; 0],
+}
+pub type CUsurfref = *mut CUsurfref_st;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct CUevent_st {
     _unused: [u8; 0],
 }
@@ -155,6 +173,16 @@ pub const CU_DEVICE_ATTRIBUTE_MULTI_GPU_BOARD_GROUP_ID: CUdevice_attribute_enum 
 pub const CU_DEVICE_ATTRIBUTE_MAX: CUdevice_attribute_enum = 86;
 pub type CUdevice_attribute_enum = u32;
 pub use self::CUdevice_attribute_enum as CUdevice_attribute;
+pub const CU_POINTER_ATTRIBUTE_CONTEXT: CUpointer_attribute_enum = 1;
+pub const CU_POINTER_ATTRIBUTE_MEMORY_TYPE: CUpointer_attribute_enum = 2;
+pub const CU_POINTER_ATTRIBUTE_DEVICE_POINTER: CUpointer_attribute_enum = 3;
+pub const CU_POINTER_ATTRIBUTE_HOST_POINTER: CUpointer_attribute_enum = 4;
+pub const CU_POINTER_ATTRIBUTE_P2P_TOKENS: CUpointer_attribute_enum = 5;
+pub const CU_POINTER_ATTRIBUTE_SYNC_MEMOPS: CUpointer_attribute_enum = 6;
+pub const CU_POINTER_ATTRIBUTE_BUFFER_ID: CUpointer_attribute_enum = 7;
+pub const CU_POINTER_ATTRIBUTE_IS_MANAGED: CUpointer_attribute_enum = 8;
+pub type CUpointer_attribute_enum = u32;
+pub use self::CUpointer_attribute_enum as CUpointer_attribute;
 pub const CU_JIT_MAX_REGISTERS: CUjit_option_enum = 0;
 pub const CU_JIT_THREADS_PER_BLOCK: CUjit_option_enum = 1;
 pub const CU_JIT_WALL_TIME: CUjit_option_enum = 2;
@@ -173,6 +201,20 @@ pub const CU_JIT_CACHE_MODE: CUjit_option_enum = 14;
 pub const CU_JIT_NUM_OPTIONS: CUjit_option_enum = 15;
 pub type CUjit_option_enum = u32;
 pub use self::CUjit_option_enum as CUjit_option;
+pub const CU_JIT_INPUT_CUBIN: CUjitInputType_enum = 0;
+pub const CU_JIT_INPUT_PTX: CUjitInputType_enum = 1;
+pub const CU_JIT_INPUT_FATBINARY: CUjitInputType_enum = 2;
+pub const CU_JIT_INPUT_OBJECT: CUjitInputType_enum = 3;
+pub const CU_JIT_INPUT_LIBRARY: CUjitInputType_enum = 4;
+pub const CU_JIT_NUM_INPUT_TYPES: CUjitInputType_enum = 5;
+pub type CUjitInputType_enum = u32;
+pub use self::CUjitInputType_enum as CUjitInputType;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CUlinkState_st {
+    _unused: [u8; 0],
+}
+pub type CUlinkState = *mut CUlinkState_st;
 pub const CUDA_SUCCESS: cudaError_enum = 0;
 pub const CUDA_ERROR_INVALID_VALUE: cudaError_enum = 1;
 pub const CUDA_ERROR_OUT_OF_MEMORY: cudaError_enum = 2;
@@ -292,6 +334,22 @@ extern "C" {
     pub fn cuDevicePrimaryCtxReset(dev: CUdevice) -> CUresult;
 }
 extern "C" {
+    pub fn cuCtxCreate_v2(
+        pctx: *mut CUcontext,
+        flags: ::std::os::raw::c_uint,
+        dev: CUdevice,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuCtxDestroy_v2(ctx: CUcontext) -> CUresult;
+}
+extern "C" {
+    pub fn cuCtxPushCurrent_v2(ctx: CUcontext) -> CUresult;
+}
+extern "C" {
+    pub fn cuCtxPopCurrent_v2(pctx: *mut CUcontext) -> CUresult;
+}
+extern "C" {
     pub fn cuCtxSetCurrent(ctx: CUcontext) -> CUresult;
 }
 extern "C" {
@@ -350,6 +408,75 @@ extern "C" {
     ) -> CUresult;
 }
 extern "C" {
+    pub fn cuModuleGetTexRef(
+        pTexRef: *mut CUtexref,
+        hmod: CUmodule,
+        name: *const ::std::os::raw::c_char,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuModuleGetSurfRef(
+        pSurfRef: *mut CUsurfref,
+        hmod: CUmodule,
+        name: *const ::std::os::raw::c_char,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuLinkCreate_v2(
+        numOptions: ::std::os::raw::c_uint,
+        options: *mut CUjit_option,
+        optionValues: *mut *mut ::std::os::raw::c_void,
+        stateOut: *mut CUlinkState,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuLinkAddData_v2(
+        state: CUlinkState,
+        type_: CUjitInputType,
+        data: *mut ::std::os::raw::c_void,
+        size: usize,
+        name: *const ::std::os::raw::c_char,
+        numOptions: ::std::os::raw::c_uint,
+        options: *mut CUjit_option,
+        optionValues: *mut *mut ::std::os::raw::c_void,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuLinkAddFile_v2(
+        state: CUlinkState,
+        type_: CUjitInputType,
+        path: *const ::std::os::raw::c_char,
+        numOptions: ::std::os::raw::c_uint,
+        options: *mut CUjit_option,
+        optionValues: *mut *mut ::std::os::raw::c_void,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuLinkComplete(
+        state: CUlinkState,
+        cubinOut: *mut *mut ::std::os::raw::c_void,
+        sizeOut: *mut usize,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuLinkDestroy(state: CUlinkState) -> CUresult;
+}
+extern "C" {
+    pub fn cuMemsetD8_v2(dstDevice: CUdeviceptr, uc: ::std::os::raw::c_uchar, N: usize)
+        -> CUresult;
+}
+extern "C" {
+    pub fn cuMemsetD16_v2(
+        dstDevice: CUdeviceptr,
+        us: ::std::os::raw::c_ushort,
+        N: usize,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuMemsetD32_v2(dstDevice: CUdeviceptr, ui: ::std::os::raw::c_uint, N: usize)
+        -> CUresult;
+}
+extern "C" {
     pub fn cuMemsetD8Async(
         dstDevice: CUdeviceptr,
         uc: ::std::os::raw::c_uchar,
@@ -371,6 +498,28 @@ extern "C" {
         ui: ::std::os::raw::c_uint,
         N: usize,
         hStream: CUstream,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuPointerGetAttribute(
+        data: *mut ::std::os::raw::c_void,
+        attribute: CUpointer_attribute,
+        ptr: CUdeviceptr,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuPointerSetAttribute(
+        value: *const ::std::os::raw::c_void,
+        attribute: CUpointer_attribute,
+        ptr: CUdeviceptr,
+    ) -> CUresult;
+}
+extern "C" {
+    pub fn cuPointerGetAttributes(
+        numAttributes: ::std::os::raw::c_uint,
+        attributes: *mut CUpointer_attribute,
+        data: *mut *mut ::std::os::raw::c_void,
+        ptr: CUdeviceptr,
     ) -> CUresult;
 }
 extern "C" {

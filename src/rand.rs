@@ -244,6 +244,14 @@ impl<RngType: CurandRngType> CurandGenerator<RngType> {
     })
   }
 
+  pub fn as_raw(&self) -> curandGenerator_t {
+    self.ptr
+  }
+
+  pub fn ptr_eq(&self, other: &CurandGenerator<RngType>) -> bool {
+    self.ptr == other.ptr
+  }
+
   pub unsafe fn set_cuda_stream_raw(&mut self, stream: cudaStream_t) -> CurandResult {
     let status = curandSetStream(
         self.ptr,
