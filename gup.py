@@ -25,6 +25,18 @@ def main():
             "CUDA_HOME=/usr/local/cuda cargo -v test --release --features {} --target-dir {}".format(*taskcfg[:-1]),
         ]
     ))
+    if taskcfg[0] == "cuda_8_0":
+      # NB: test cuda-sys.
+      #batch.append(gp.task(
+      tasks.append(gp.taskspec(
+          name="hello",
+          toolchain="rust_nightly",
+          **task_kwargs,
+          allow_errors=True,
+          sh=[
+              "CUDA_HOME=/usr/local/cuda cargo -v test --release --features cuda_sys,{} --target-dir {}".format(*taskcfg[:-1]),
+          ]
+      ))
   gp.print_tasks(tasks)
   #batch.print()
 
