@@ -1,6 +1,5 @@
 #[cfg(feature = "cuda_sys")]
 extern crate cuda_sys;
-#[cfg(not(feature = "cuda_sys"))]
 #[macro_use] extern crate static_assertions;
 
 pub mod blas;

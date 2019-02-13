@@ -50,3 +50,6 @@ pub mod cuda_runtime_api {
   pub const cudaMemcpyDeviceToDevice: cudaMemcpyKind = cudaMemcpyKind_cudaMemcpyDeviceToDevice;
   pub const cudaMemcpyDefault: cudaMemcpyKind = cudaMemcpyKind_cudaMemcpyDefault;
 }
+
+const_assert_eq!(cuda_api_version; self::cuda::__CUDA_API_VERSION,  8000);
+const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        8000);
