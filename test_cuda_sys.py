@@ -2,7 +2,7 @@ from guppy import latest as gp
 
 def main():
   task_configs = [
-      ("cuda_8_0",  "target-ub1604", (("require_cuda", "8.0"),  ("require_distro", "ubuntu 16.04"))),
+      ("cuda_8_0",  "target-ubuntu_16_04.cached", (("require_cuda", "8.0"),  ("require_distro", "ubuntu 16.04"))),
   ]
   tasks = []
   #batch = gp.batch()
