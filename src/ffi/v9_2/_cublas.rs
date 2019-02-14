@@ -158,6 +158,15 @@ extern "C" {
     ) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasDnrm2_v2(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        x: *const f64,
+        incx: ::std::os::raw::c_int,
+        result: *mut f64,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasSdot_v2(
         handle: cublasHandle_t,
         n: ::std::os::raw::c_int,
@@ -166,6 +175,17 @@ extern "C" {
         y: *const f32,
         incy: ::std::os::raw::c_int,
         result: *mut f32,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasDdot_v2(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        x: *const f64,
+        incx: ::std::os::raw::c_int,
+        y: *const f64,
+        incy: ::std::os::raw::c_int,
+        result: *mut f64,
     ) -> cublasStatus_t;
 }
 extern "C" {
@@ -178,6 +198,15 @@ extern "C" {
     ) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasDscal_v2(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        alpha: *const f64,
+        x: *mut f64,
+        incx: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasSaxpy_v2(
         handle: cublasHandle_t,
         n: ::std::os::raw::c_int,
@@ -185,6 +214,17 @@ extern "C" {
         x: *const f32,
         incx: ::std::os::raw::c_int,
         y: *mut f32,
+        incy: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasDaxpy_v2(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        alpha: *const f64,
+        x: *const f64,
+        incx: ::std::os::raw::c_int,
+        y: *mut f64,
         incy: ::std::os::raw::c_int,
     ) -> cublasStatus_t;
 }
@@ -205,6 +245,22 @@ extern "C" {
     ) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasDgemv_v2(
+        handle: cublasHandle_t,
+        trans: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        alpha: *const f64,
+        A: *const f64,
+        lda: ::std::os::raw::c_int,
+        x: *const f64,
+        incx: ::std::os::raw::c_int,
+        beta: *const f64,
+        y: *mut f64,
+        incy: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasSgemm_v2(
         handle: cublasHandle_t,
         transa: cublasOperation_t,
@@ -219,6 +275,24 @@ extern "C" {
         ldb: ::std::os::raw::c_int,
         beta: *const f32,
         C: *mut f32,
+        ldc: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasDgemm_v2(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f64,
+        A: *const f64,
+        lda: ::std::os::raw::c_int,
+        B: *const f64,
+        ldb: ::std::os::raw::c_int,
+        beta: *const f64,
+        C: *mut f64,
         ldc: ::std::os::raw::c_int,
     ) -> cublasStatus_t;
 }

@@ -328,6 +328,92 @@ impl CublasLevel1<f32> for CublasHandle {
   }
 }
 
+impl CublasLevel1<f64> for CublasHandle {
+  unsafe fn axpy(&mut self,
+      num: i32,
+      alpha: *const f64,
+      x: *const f64,
+      incx: i32,
+      y: *mut f64,
+      incy: i32,
+  ) -> CublasResult {
+    let status = cublasDaxpy_v2(
+        self.ptr,
+        num,
+        alpha,
+        x,
+        incx,
+        y,
+        incy,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+
+  unsafe fn dot(&mut self,
+      num: i32,
+      x: *const f64,
+      incx: i32,
+      y: *const f64,
+      incy: i32,
+      result: *mut f64,
+  ) -> CublasResult {
+    let status = cublasDdot_v2(
+        self.ptr,
+        num,
+        x,
+        incx,
+        y,
+        incy,
+        result,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+
+  unsafe fn nrm2(&mut self,
+      num: i32,
+      x: *const f64,
+      incx: i32,
+      result: *mut f64,
+  ) -> CublasResult {
+    let status = cublasDnrm2_v2(
+        self.ptr,
+        num,
+        x,
+        incx,
+        result,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+
+  unsafe fn scal(&mut self,
+      num: i32,
+      alpha: *const f64,
+      x: *mut f64,
+      incx: i32,
+  ) -> CublasResult {
+    let status = cublasDscal_v2(
+        self.ptr,
+        num,
+        alpha,
+        x,
+        incx,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+}
+
 pub trait CublasLevel2<T> {
   unsafe fn gemv(&mut self,
       transpose: CublasTranspose,
@@ -359,6 +445,41 @@ impl CublasLevel2<f32> for CublasHandle {
       incy: i32,
   ) -> CublasResult {
     let status = cublasSgemv_v2(
+        self.ptr,
+        transpose.to_raw(),
+        rows,
+        cols,
+        alpha,
+        a,
+        lda,
+        x,
+        incx,
+        beta,
+        y,
+        incy,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+}
+
+impl CublasLevel2<f64> for CublasHandle {
+  unsafe fn gemv(&mut self,
+      transpose: CublasTranspose,
+      rows: i32,
+      cols: i32,
+      alpha: *const f64,
+      a: *const f64,
+      lda: i32,
+      x: *const f64,
+      incx: i32,
+      beta: *const f64,
+      y: *mut f64,
+      incy: i32,
+  ) -> CublasResult {
+    let status = cublasDgemv_v2(
         self.ptr,
         transpose.to_raw(),
         rows,
@@ -414,6 +535,45 @@ impl CublasLevel3<f32> for CublasHandle {
       ldc: i32,
   ) -> CublasResult {
     let status = cublasSgemm_v2(
+        self.ptr,
+        transpose_a.to_raw(),
+        transpose_b.to_raw(),
+        rows,
+        cols,
+        inner_dim,
+        alpha,
+        a,
+        lda,
+        b,
+        ldb,
+        beta,
+        c,
+        ldc,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+}
+
+impl CublasLevel3<f64> for CublasHandle {
+  unsafe fn gemm(&mut self,
+      transpose_a: CublasTranspose,
+      transpose_b: CublasTranspose,
+      rows: i32,
+      cols: i32,
+      inner_dim: i32,
+      alpha: *const f64,
+      a: *const f64,
+      lda: i32,
+      b: *const f64,
+      ldb: i32,
+      beta: *const f64,
+      c: *mut f64,
+      ldc: i32,
+  ) -> CublasResult {
+    let status = cublasDgemm_v2(
         self.ptr,
         transpose_a.to_raw(),
         transpose_b.to_raw(),
