@@ -1,3 +1,5 @@
+[![docs.rs](https://docs.rs/cuda/badge.svg)](https://docs.rs/cuda)
+
 These are Rust bindings to the CUDA toolkit APIs.
 
 [Documentation (master, CUDA 10.0)](https://peterhj.github.io/libcuda-docs/cuda/)
