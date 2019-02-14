@@ -17,7 +17,7 @@ def main():
     task_kwargs = dict(taskcfg[1])
     #batch.append(gp.task(
     tasks.append(gp.taskspec(
-        name="hello",
+        name="{}".format(taskcfg[0][0]),
         toolchain="rust_nightly",
         **task_kwargs,
         sh=[
@@ -28,7 +28,7 @@ def main():
       # NB: test cuda-sys.
       #batch.append(gp.task(
       tasks.append(gp.taskspec(
-          name="hello",
+          name="{}+cuda_sys".format(taskcfg[0][0]),
           toolchain="rust_nightly",
           **task_kwargs,
           sh=[
