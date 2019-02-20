@@ -114,6 +114,14 @@ extern "C" {
     pub fn cudaEventElapsedTime(ms: *mut f32, start: cudaEvent_t, end: cudaEvent_t) -> cudaError_t;
 }
 extern "C" {
+    pub fn cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+        numBlocks: *mut ::std::os::raw::c_int,
+        func: *const ::std::os::raw::c_void,
+        blockSize: ::std::os::raw::c_int,
+        dynamicSMemSize: usize,
+    ) -> cudaError_t;
+}
+extern "C" {
     pub fn cudaMallocManaged(
         devPtr: *mut *mut ::std::os::raw::c_void,
         size: usize,

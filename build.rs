@@ -336,6 +336,9 @@ fn main() {
     .whitelist_function("cudaEventQuery")
     .whitelist_function("cudaEventRecord")
     .whitelist_function("cudaEventSynchronize")
+    // Occupancy.
+    .whitelist_function("cudaOccupancyMaxActiveBlocksPerMultiprocessor")
+    .whitelist_function("cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags")
     // Memory management.
     .whitelist_function("cudaMalloc")
     .whitelist_function("cudaFree")

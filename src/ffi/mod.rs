@@ -28,6 +28,12 @@ mod v {
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        6050);
 }
 
+#[cfg(feature = "cuda_gte_7_0")]
+mod v7_0 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >=  7000);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >=  7000);
+}
+
 #[cfg(feature = "cuda_7_0")]
 mod v {
   pub mod cublas            { use crate::ffi::driver_types::*;
@@ -44,6 +50,12 @@ mod v {
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        7000);
 }
 
+#[cfg(feature = "cuda_gte_7_5")]
+mod v7_5 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >=  7050);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >=  7050);
+}
+
 #[cfg(feature = "cuda_7_5")]
 mod v {
   pub mod cublas            { use crate::ffi::driver_types::*;
@@ -58,6 +70,12 @@ mod v {
 
   const_assert_eq!(cuda_api_version; self::cuda::__CUDA_API_VERSION,  7050);
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        7050);
+}
+
+#[cfg(feature = "cuda_gte_8_0")]
+mod v8_0 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >=  8000);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >=  8000);
 }
 
 #[cfg(feature = "cuda_8_0")]
@@ -80,6 +98,12 @@ mod v {
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        8000);
 }
 
+#[cfg(feature = "cuda_gte_9_0")]
+mod v9_0 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >=  9000);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >=  9000);
+}
+
 #[cfg(feature = "cuda_9_0")]
 mod v {
   pub mod cublas            { use crate::ffi::driver_types::*;
@@ -98,6 +122,12 @@ mod v {
 
   const_assert_eq!(cuda_api_version; self::cuda::__CUDA_API_VERSION,  9000);
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        9000);
+}
+
+#[cfg(feature = "cuda_gte_9_1")]
+mod v9_1 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >=  9010);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >=  9010);
 }
 
 #[cfg(feature = "cuda_9_1")]
@@ -120,6 +150,12 @@ mod v {
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        9010);
 }
 
+#[cfg(feature = "cuda_gte_9_2")]
+mod v9_2 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >=  9020);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >=  9020);
+}
+
 #[cfg(feature = "cuda_9_2")]
 mod v {
   pub mod cublas            { use crate::ffi::driver_types::*;
@@ -138,6 +174,12 @@ mod v {
 
   const_assert_eq!(cuda_api_version; self::cuda::__CUDA_API_VERSION,  9020);
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,        9020);
+}
+
+#[cfg(feature = "cuda_gte_10_0")]
+mod v10_0 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >= 10000);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >= 10000);
 }
 
 #[cfg(feature = "cuda_10_0")]
