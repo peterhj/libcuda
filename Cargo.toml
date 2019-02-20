@@ -1,6 +1,6 @@
 [package]
 name = "cuda"
-version = "0.4.0-pre.0"
+version = "0.4.0-pre.1"
 edition = "2018"
 authors = ["Peter Jin <peterhaijin@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -14,7 +14,6 @@ default-target = "x86_64-unknown-linux-gnu"
 
 [features]
 default         = []
-fresh           = ["bindgen"]
 cuda_6_5        = []
 cuda_7_0        = ["cuda_gte_7_0"]
 cuda_7_5        = ["cuda_gte_7_0", "cuda_gte_7_5"]
@@ -31,6 +30,7 @@ cuda_gte_9_1    = []
 cuda_gte_9_2    = []
 cuda_gte_10_0   = []
 cuda_sys        = ["cuda-sys", "cuda_8_0"]
+fresh           = ["bindgen"]
 
 [build-dependencies]
 bindgen = { version = "^0.47", optional = true }

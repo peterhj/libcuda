@@ -370,6 +370,14 @@ pub fn cuda_alloc_host(size: usize) -> CudaResult<*mut u8> {
   }
 }
 
+pub fn cuda_alloc_host_with_flags(size: usize, flags: u32) -> CudaResult<*mut u8> {
+  let mut ptr: *mut c_void = null_mut();
+  match unsafe { cudaHostAlloc(&mut ptr as *mut *mut c_void, size, flags) } {
+    cudaSuccess => Ok(ptr as *mut u8),
+    e => Err(CudaError(e)),
+  }
+}
+
 pub unsafe fn cuda_free_device(dptr: *mut u8) -> CudaResult {
   match cudaFree(dptr as *mut c_void) {
     cudaSuccess => Ok(()),
