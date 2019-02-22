@@ -1,4 +1,4 @@
-from guppy import latest as gp
+import guppy.v1 as gp
 
 def main():
   task_configs = [
