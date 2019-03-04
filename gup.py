@@ -12,10 +12,10 @@ def main():
       (("cuda_6_5",  "target-ubuntu_14_04.cached"), (("require_cuda", "6.5"),  ("require_distro", "ubuntu 14.04"))),
   ]
   tasks = []
-  #batch = gp.batch()
+  #run = gp.run()
   for taskcfg in task_configs:
     task_kwargs = dict(taskcfg[1])
-    #batch.append(gp.task(
+    #run.append(gp.task(
     tasks.append(gp.taskspec(
         name="{}".format(taskcfg[0][0]),
         toolchain="rust_nightly",
@@ -26,7 +26,7 @@ def main():
     ))
     if taskcfg[0][0] == "cuda_8_0":
       # NB: test cuda-sys.
-      #batch.append(gp.task(
+      #run.append(gp.task(
       tasks.append(gp.taskspec(
           name="{}+cuda_sys".format(taskcfg[0][0]),
           toolchain="rust_nightly",
@@ -36,7 +36,7 @@ def main():
           ]
       ))
   gp.print_tasks(tasks)
-  #batch.print()
+  #run.print()
 
 if __name__ == "__main__":
   main()
