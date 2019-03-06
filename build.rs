@@ -549,6 +549,8 @@ fn main() {
     .whitelist_function("cublasDgemv_v2")
     .whitelist_function("cublasSgemm_v2")
     .whitelist_function("cublasDgemm_v2")
+    .whitelist_function("cublasHgemm")
+    .whitelist_function("cublasSgemmEx")
     .whitelist_function("cublasGemmEx")
     .generate_comments(false)
     .prepend_enum_name(false)
