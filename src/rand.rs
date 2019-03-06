@@ -133,6 +133,30 @@ impl CurandRngType for CurandDefaultRngType {
 
 impl CurandPseudoRngType for CurandDefaultRngType {}
 
+impl CurandRngType for CurandXorwowRngType {
+  fn rng_type_raw() -> curandRngType_t {
+    CURAND_RNG_PSEUDO_XORWOW
+  }
+}
+
+impl CurandPseudoRngType for CurandXorwowRngType {}
+
+impl CurandRngType for CurandMrg32k3aRngType {
+  fn rng_type_raw() -> curandRngType_t {
+    CURAND_RNG_PSEUDO_MRG32K3A
+  }
+}
+
+impl CurandPseudoRngType for CurandMrg32k3aRngType {}
+
+impl CurandRngType for CurandMtgp32RngType {
+  fn rng_type_raw() -> curandRngType_t {
+    CURAND_RNG_PSEUDO_MTGP32
+  }
+}
+
+impl CurandPseudoRngType for CurandMtgp32RngType {}
+
 impl CurandRngType for CurandMt19937RngType {
   fn rng_type_raw() -> curandRngType_t {
     CURAND_RNG_PSEUDO_MT19937
@@ -159,6 +183,9 @@ impl CurandQuasiRngType for CurandDefaultQrngType {}
 
 pub type CurandTestRng = CurandGenerator<CurandTestRngType>;
 pub type CurandDefaultRng = CurandGenerator<CurandDefaultRngType>;
+pub type CurandXorwowRng = CurandGenerator<CurandXorwowRngType>;
+pub type CurandMrg32k3aRng = CurandGenerator<CurandMrg32k3aRngType>;
+pub type CurandMtgp32Rng = CurandGenerator<CurandMtgp32RngType>;
 pub type CurandMt19937Rng = CurandGenerator<CurandMt19937RngType>;
 pub type CurandPhilox4x32_10Rng = CurandGenerator<CurandPhilox4x32_10RngType>;
 pub type CurandDefaultQrng = CurandGenerator<CurandDefaultQrngType>;
