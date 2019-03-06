@@ -549,7 +549,6 @@ fn main() {
     .whitelist_function("cublasDgemv_v2")
     .whitelist_function("cublasSgemm_v2")
     .whitelist_function("cublasDgemm_v2")
-    .whitelist_function("cublasHgemm")
     .whitelist_function("cublasSgemmEx")
     .whitelist_function("cublasGemmEx")
     .generate_comments(false)
@@ -559,4 +558,25 @@ fn main() {
     .expect("bindgen failed to generate cublas bindings")
     .write_to_file(gensrc_dir.join("_cublas.rs"))
     .expect("bindgen failed to write cublas bindings");
+
+  if cfg!(feature = "cuda_gte_8_0") {
+    fs::remove_file(gensrc_dir.join("_cublas_cxx.rs")).ok();
+    let builder = bindgen::Builder::default();
+    if let Some(ref cuda_include_dir) = maybe_cuda_include_dir {
+      builder.clang_arg(format!("-I{}", cuda_include_dir.display()))
+    } else {
+      builder
+    }
+      .clang_arg("-x").clang_arg("c++")
+      .clang_arg("-std=c++11")
+      .header("wrapped_cublas.h")
+      .whitelist_recursively(false)
+      .whitelist_function("cublasHgemm")
+      .generate_comments(false)
+      .rustfmt_bindings(true)
+      .generate()
+      .expect("bindgen failed to generate cublas (c++) bindings")
+      .write_to_file(gensrc_dir.join("_cublas_cxx.rs"))
+      .expect("bindgen failed to write cublas (c++) bindings");
+  }
 }

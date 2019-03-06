@@ -297,6 +297,27 @@ extern "C" {
     ) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasSgemmEx(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f32,
+        A: *const ::std::os::raw::c_void,
+        Atype: cudaDataType,
+        lda: ::std::os::raw::c_int,
+        B: *const ::std::os::raw::c_void,
+        Btype: cudaDataType,
+        ldb: ::std::os::raw::c_int,
+        beta: *const f32,
+        C: *mut ::std::os::raw::c_void,
+        Ctype: cudaDataType,
+        ldc: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasGemmEx(
         handle: cublasHandle_t,
         transa: cublasOperation_t,
