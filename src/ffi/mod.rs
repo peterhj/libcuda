@@ -158,9 +158,11 @@ mod v9_2 {
 
 #[cfg(feature = "cuda_9_2")]
 mod v {
-  pub mod cublas            { use crate::ffi::driver_types::*;
+  pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
+                              use crate::ffi::driver_types::*;
                               use crate::ffi::library_types::*;
-                              include!("v9_2/_cublas.rs"); }
+                              include!("v9_2/_cublas.rs");
+                              include!("v9_2/_cublas_cxx.rs"); }
   pub mod cuda              { include!("v9_2/_cuda.rs"); }
   pub mod cuda_fp16         { include!("v9_2/_cuda_fp16.rs"); }
   pub mod cuda_runtime_api  { use crate::ffi::driver_types::*;
