@@ -21,6 +21,11 @@ pub type cublasPointerMode_t = u32;
 pub const CUBLAS_ATOMICS_NOT_ALLOWED: cublasAtomicsMode_t = 0;
 pub const CUBLAS_ATOMICS_ALLOWED: cublasAtomicsMode_t = 1;
 pub type cublasAtomicsMode_t = u32;
+pub const CUBLAS_DATA_FLOAT: cublasDataType_t = 0;
+pub const CUBLAS_DATA_DOUBLE: cublasDataType_t = 1;
+pub const CUBLAS_DATA_HALF: cublasDataType_t = 2;
+pub const CUBLAS_DATA_INT8: cublasDataType_t = 3;
+pub type cublasDataType_t = u32;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct cublasContext {
@@ -217,6 +222,27 @@ extern "C" {
         ldb: ::std::os::raw::c_int,
         beta: *const f64,
         C: *mut f64,
+        ldc: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasSgemmEx(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f32,
+        A: *const ::std::os::raw::c_void,
+        Atype: cublasDataType_t,
+        lda: ::std::os::raw::c_int,
+        B: *const ::std::os::raw::c_void,
+        Btype: cublasDataType_t,
+        ldb: ::std::os::raw::c_int,
+        beta: *const f32,
+        C: *mut ::std::os::raw::c_void,
+        Ctype: cublasDataType_t,
         ldc: ::std::os::raw::c_int,
     ) -> cublasStatus_t;
 }

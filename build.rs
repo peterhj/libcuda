@@ -511,6 +511,8 @@ fn main() {
     .whitelist_type("cublasStatus_t")
     .whitelist_type("cublasContext")
     .whitelist_type("cublasHandle_t")
+    .whitelist_type("cublasDataType")
+    .whitelist_type("cublasDataType_t")
     .whitelist_type("cublasPointerMode")
     .whitelist_type("cublasPointerMode_t")
     .whitelist_type("cublasAtomicsMode")
