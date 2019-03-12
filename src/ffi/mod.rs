@@ -80,8 +80,10 @@ mod v8_0 {
 
 #[cfg(feature = "cuda_8_0")]
 mod v {
-  pub mod cublas            { use crate::ffi::driver_types::*;
-                              use crate::ffi::library_types::*;
+  pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
+                              use crate::ffi::driver_types::*;
+                              pub use crate::ffi::library_types::{cudaDataType};
+                              use crate::ffi::library_types::{libraryPropertyType};
                               include!("v8_0/_cublas.rs"); }
   pub mod cuda              { include!("v8_0/_cuda.rs"); }
   pub mod cuda_fp16         { include!("v8_0/cuda_fp16.rs"); }
@@ -106,8 +108,10 @@ mod v9_0 {
 
 #[cfg(feature = "cuda_9_0")]
 mod v {
-  pub mod cublas            { use crate::ffi::driver_types::*;
-                              use crate::ffi::library_types::*;
+  pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
+                              use crate::ffi::driver_types::*;
+                              pub use crate::ffi::library_types::{cudaDataType};
+                              use crate::ffi::library_types::{libraryPropertyType};
                               include!("v9_0/_cublas.rs"); }
   pub mod cuda              { include!("v9_0/_cuda.rs"); }
   pub mod cuda_fp16         { include!("v9_0/_cuda_fp16.rs"); }
@@ -132,8 +136,10 @@ mod v9_1 {
 
 #[cfg(feature = "cuda_9_1")]
 mod v {
-  pub mod cublas            { use crate::ffi::driver_types::*;
-                              use crate::ffi::library_types::*;
+  pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
+                              use crate::ffi::driver_types::*;
+                              pub use crate::ffi::library_types::{cudaDataType};
+                              use crate::ffi::library_types::{libraryPropertyType};
                               include!("v9_1/_cublas.rs"); }
   pub mod cuda              { include!("v9_1/_cuda.rs"); }
   pub mod cuda_fp16         { include!("v9_1/_cuda_fp16.rs"); }
@@ -160,7 +166,8 @@ mod v9_2 {
 mod v {
   pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
                               use crate::ffi::driver_types::*;
-                              use crate::ffi::library_types::*;
+                              pub use crate::ffi::library_types::{cudaDataType};
+                              use crate::ffi::library_types::{libraryPropertyType};
                               include!("v9_2/_cublas.rs");
                               include!("v9_2/_cublas_cxx.rs"); }
   pub mod cuda              { include!("v9_2/_cuda.rs"); }
@@ -188,7 +195,8 @@ mod v10_0 {
 mod v {
   pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
                               use crate::ffi::driver_types::*;
-                              use crate::ffi::library_types::*;
+                              pub use crate::ffi::library_types::{cudaDataType};
+                              use crate::ffi::library_types::{libraryPropertyType};
                               include!("v10_0/_cublas.rs");
                               include!("v10_0/_cublas_cxx.rs"); }
   pub mod cuda              { include!("v10_0/_cuda.rs"); }

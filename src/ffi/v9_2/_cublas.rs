@@ -69,6 +69,7 @@ pub type cublasGemmAlgo_t = i32;
 pub const CUBLAS_DEFAULT_MATH: cublasMath_t = 0;
 pub const CUBLAS_TENSOR_OP_MATH: cublasMath_t = 1;
 pub type cublasMath_t = u32;
+pub use self::cudaDataType as cublasDataType_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct cublasContext {
@@ -338,5 +339,97 @@ extern "C" {
         ldc: ::std::os::raw::c_int,
         computeType: cudaDataType,
         algo: cublasGemmAlgo_t,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasSgemmBatched(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f32,
+        Aarray: *const *const f32,
+        lda: ::std::os::raw::c_int,
+        Barray: *const *const f32,
+        ldb: ::std::os::raw::c_int,
+        beta: *const f32,
+        Carray: *const *mut f32,
+        ldc: ::std::os::raw::c_int,
+        batchCount: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasGemmBatchedEx(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const ::std::os::raw::c_void,
+        Aarray: *const *const ::std::os::raw::c_void,
+        Atype: cudaDataType,
+        lda: ::std::os::raw::c_int,
+        Barray: *const *const ::std::os::raw::c_void,
+        Btype: cudaDataType,
+        ldb: ::std::os::raw::c_int,
+        beta: *const ::std::os::raw::c_void,
+        Carray: *const *mut ::std::os::raw::c_void,
+        Ctype: cudaDataType,
+        ldc: ::std::os::raw::c_int,
+        batchCount: ::std::os::raw::c_int,
+        computeType: cudaDataType,
+        algo: cublasGemmAlgo_t,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasGemmStridedBatchedEx(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const ::std::os::raw::c_void,
+        A: *const ::std::os::raw::c_void,
+        Atype: cudaDataType,
+        lda: ::std::os::raw::c_int,
+        strideA: ::std::os::raw::c_longlong,
+        B: *const ::std::os::raw::c_void,
+        Btype: cudaDataType,
+        ldb: ::std::os::raw::c_int,
+        strideB: ::std::os::raw::c_longlong,
+        beta: *const ::std::os::raw::c_void,
+        C: *mut ::std::os::raw::c_void,
+        Ctype: cudaDataType,
+        ldc: ::std::os::raw::c_int,
+        strideC: ::std::os::raw::c_longlong,
+        batchCount: ::std::os::raw::c_int,
+        computeType: cudaDataType,
+        algo: cublasGemmAlgo_t,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasSgemmStridedBatched(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f32,
+        A: *const f32,
+        lda: ::std::os::raw::c_int,
+        strideA: ::std::os::raw::c_longlong,
+        B: *const f32,
+        ldb: ::std::os::raw::c_int,
+        strideB: ::std::os::raw::c_longlong,
+        beta: *const f32,
+        C: *mut f32,
+        ldc: ::std::os::raw::c_int,
+        strideC: ::std::os::raw::c_longlong,
+        batchCount: ::std::os::raw::c_int,
     ) -> cublasStatus_t;
 }
