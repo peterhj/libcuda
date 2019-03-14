@@ -19,7 +19,7 @@ def main():
         toolchain="rust_nightly",
         **task_kwargs,
         sh=[
-            "CUDA_HOME=/usr/local/cuda cargo -v test --release --features {} --target-dir {}".format(*taskcfg[0]),
+            "CUDA_HOME=/usr/local/cuda RUSTFLAGS=\"-D warnings\" cargo -v test --release --features {} --target-dir {}".format(*taskcfg[0]),
         ]
     ))
     if taskcfg[0][0] == "cuda_8_0":
@@ -29,7 +29,7 @@ def main():
           toolchain="rust_nightly",
           **task_kwargs,
           sh=[
-              "CUDA_HOME=/usr/local/cuda cargo -v test --release --features cuda_sys,{} --target-dir {}".format(*taskcfg[0]),
+              "CUDA_HOME=/usr/local/cuda RUSTFLAGS=\"-D warnings\" cargo -v test --release --features cuda_sys,{} --target-dir {}".format(*taskcfg[0]),
           ]
       ))
   gp.out(run)
