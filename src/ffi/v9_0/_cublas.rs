@@ -117,6 +117,18 @@ extern "C" {
     pub fn cublasSetMathMode(handle: cublasHandle_t, mode: cublasMath_t) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasNrm2Ex(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        x: *const ::std::os::raw::c_void,
+        xType: cudaDataType,
+        incx: ::std::os::raw::c_int,
+        result: *mut ::std::os::raw::c_void,
+        resultType: cudaDataType,
+        executionType: cudaDataType,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasSnrm2_v2(
         handle: cublasHandle_t,
         n: ::std::os::raw::c_int,
@@ -132,6 +144,21 @@ extern "C" {
         x: *const f64,
         incx: ::std::os::raw::c_int,
         result: *mut f64,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasDotEx(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        x: *const ::std::os::raw::c_void,
+        xType: cudaDataType,
+        incx: ::std::os::raw::c_int,
+        y: *const ::std::os::raw::c_void,
+        yType: cudaDataType,
+        incy: ::std::os::raw::c_int,
+        result: *mut ::std::os::raw::c_void,
+        resultType: cudaDataType,
+        executionType: cudaDataType,
     ) -> cublasStatus_t;
 }
 extern "C" {
@@ -157,6 +184,18 @@ extern "C" {
     ) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasScalEx(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        alpha: *const ::std::os::raw::c_void,
+        alphaType: cudaDataType,
+        x: *mut ::std::os::raw::c_void,
+        xType: cudaDataType,
+        incx: ::std::os::raw::c_int,
+        executionType: cudaDataType,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasSscal_v2(
         handle: cublasHandle_t,
         n: ::std::os::raw::c_int,
@@ -172,6 +211,21 @@ extern "C" {
         alpha: *const f64,
         x: *mut f64,
         incx: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasAxpyEx(
+        handle: cublasHandle_t,
+        n: ::std::os::raw::c_int,
+        alpha: *const ::std::os::raw::c_void,
+        alphaType: cudaDataType,
+        x: *const ::std::os::raw::c_void,
+        xType: cudaDataType,
+        incx: ::std::os::raw::c_int,
+        y: *mut ::std::os::raw::c_void,
+        yType: cudaDataType,
+        incy: ::std::os::raw::c_int,
+        executiontype: cudaDataType,
     ) -> cublasStatus_t;
 }
 extern "C" {
