@@ -35,6 +35,7 @@ impl CublasError {
       CUBLAS_STATUS_INTERNAL_ERROR => Some("CUBLAS_STATUS_INTERNAL_ERROR"),
       CUBLAS_STATUS_NOT_SUPPORTED => Some("CUBLAS_STATUS_NOT_SUPPORTED"),
       CUBLAS_STATUS_LICENSE_ERROR => Some("CUBLAS_STATUS_LICENSE_ERROR"),
+      #[cfg(not(feature = "cuda_sys"))]
       _ => None,
     }
   }
