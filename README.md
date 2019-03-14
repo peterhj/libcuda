@@ -1,3 +1,4 @@
+[![guppybot.org](https://guppybot.org/ci/peterhj/libcuda/badge.svg)](https://guppybot.org/ci/peterhj/libcuda)
 [![docs.rs](https://docs.rs/cuda/badge.svg)](https://docs.rs/cuda)
 
 These are Rust bindings to the CUDA toolkit APIs.
