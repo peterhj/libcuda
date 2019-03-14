@@ -2,6 +2,7 @@
 
 use crate::extras::{MemInfo};
 use crate::ffi::cuda_runtime_api::*;
+#[cfg(not(feature = "cuda_sys"))]
 use crate::ffi::driver_types::*;
 
 use std::ffi::{CStr};
