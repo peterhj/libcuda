@@ -1,4 +1,6 @@
 use crate::ffi::cublas::*;
+#[cfg(all(feature = "cuda_gte_8_0", not(feature = "cuda_sys")))]
+use crate::ffi::cuda_fp16::{__half};
 use crate::ffi::driver_types::{cudaStream_t};
 use crate::runtime::{CudaStream};
 
@@ -575,6 +577,46 @@ impl CublasLevel3<f64> for CublasHandle {
       ldc: i32,
   ) -> CublasResult {
     let status = cublasDgemm_v2(
+        self.ptr,
+        transpose_a.to_raw(),
+        transpose_b.to_raw(),
+        rows,
+        cols,
+        inner_dim,
+        alpha,
+        a,
+        lda,
+        b,
+        ldb,
+        beta,
+        c,
+        ldc,
+    );
+    match status {
+      CUBLAS_STATUS_SUCCESS => Ok(()),
+      _ => Err(CublasError(status)),
+    }
+  }
+}
+
+#[cfg(all(feature = "cuda_gte_8_0", not(feature = "cuda_sys")))]
+impl CublasLevel3<__half> for CublasHandle {
+  unsafe fn gemm(&mut self,
+      transpose_a: CublasTranspose,
+      transpose_b: CublasTranspose,
+      rows: i32,
+      cols: i32,
+      inner_dim: i32,
+      alpha: *const __half,
+      a: *const __half,
+      lda: i32,
+      b: *const __half,
+      ldb: i32,
+      beta: *const __half,
+      c: *mut __half,
+      ldc: i32,
+  ) -> CublasResult {
+    let status = cublasHgemm(
         self.ptr,
         transpose_a.to_raw(),
         transpose_b.to_raw(),
