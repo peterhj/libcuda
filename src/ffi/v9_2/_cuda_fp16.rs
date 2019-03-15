@@ -29,11 +29,11 @@ fn bindgen_test_layout___half() {
     );
 }
 #[repr(C)]
+#[repr(align(4))]
 #[derive(Debug, Copy, Clone)]
 pub struct __half2 {
     pub x: __half,
     pub y: __half,
-    pub __bindgen_align: [u32; 0usize],
 }
 #[test]
 fn bindgen_test_layout___half2() {
