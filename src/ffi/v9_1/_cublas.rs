@@ -382,6 +382,25 @@ extern "C" {
     ) -> cublasStatus_t;
 }
 extern "C" {
+    pub fn cublasDgemmBatched(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f64,
+        Aarray: *mut *const f64,
+        lda: ::std::os::raw::c_int,
+        Barray: *mut *const f64,
+        ldb: ::std::os::raw::c_int,
+        beta: *const f64,
+        Carray: *mut *mut f64,
+        ldc: ::std::os::raw::c_int,
+        batchCount: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
     pub fn cublasGemmBatchedEx(
         handle: cublasHandle_t,
         transa: cublasOperation_t,
@@ -449,6 +468,28 @@ extern "C" {
         strideB: ::std::os::raw::c_longlong,
         beta: *const f32,
         C: *mut f32,
+        ldc: ::std::os::raw::c_int,
+        strideC: ::std::os::raw::c_longlong,
+        batchCount: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}
+extern "C" {
+    pub fn cublasDgemmStridedBatched(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f64,
+        A: *const f64,
+        lda: ::std::os::raw::c_int,
+        strideA: ::std::os::raw::c_longlong,
+        B: *const f64,
+        ldb: ::std::os::raw::c_int,
+        strideB: ::std::os::raw::c_longlong,
+        beta: *const f64,
+        C: *mut f64,
         ldc: ::std::os::raw::c_int,
         strideC: ::std::os::raw::c_longlong,
         batchCount: ::std::os::raw::c_int,

@@ -239,3 +239,22 @@ extern "C" {
         batchCount: ::std::os::raw::c_int,
     ) -> cublasStatus_t;
 }
+extern "C" {
+    pub fn cublasDgemmBatched(
+        handle: cublasHandle_t,
+        transa: cublasOperation_t,
+        transb: cublasOperation_t,
+        m: ::std::os::raw::c_int,
+        n: ::std::os::raw::c_int,
+        k: ::std::os::raw::c_int,
+        alpha: *const f64,
+        Aarray: *mut *const f64,
+        lda: ::std::os::raw::c_int,
+        Barray: *mut *const f64,
+        ldb: ::std::os::raw::c_int,
+        beta: *const f64,
+        Carray: *mut *mut f64,
+        ldc: ::std::os::raw::c_int,
+        batchCount: ::std::os::raw::c_int,
+    ) -> cublasStatus_t;
+}

@@ -552,6 +552,8 @@ fn main() {
     .whitelist_function("cublasSgemmEx")
     .whitelist_function("cublasSgemmBatched")
     .whitelist_function("cublasSgemmStridedBatched")
+    .whitelist_function("cublasDgemmBatched")
+    .whitelist_function("cublasDgemmStridedBatched")
     .whitelist_function("cublasGemmEx")
     .whitelist_function("cublasGemmBatchedEx")
     .whitelist_function("cublasGemmStridedBatchedEx")
