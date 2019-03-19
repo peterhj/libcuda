@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 set -ex
-guppyctl run --mut -f gen_bindings.py
+guppyctl tmp-run --mut -O -f gen_bindings.py

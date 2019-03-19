@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 set -ex
-guppyctl run --mut
+guppyctl tmp-run --mut -O

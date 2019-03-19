@@ -17,6 +17,7 @@ use std::path::{PathBuf};
         feature = "cuda_9_1",
         feature = "cuda_9_2",
         feature = "cuda_10_0",
+        feature = "cuda_10_1",
     ))
 ))]
 fn main() {
@@ -56,6 +57,7 @@ fn to_cuda_lib_dir(cuda_dir: &PathBuf) -> PathBuf {
         feature = "cuda_9_1",
         feature = "cuda_9_2",
         feature = "cuda_10_0",
+        feature = "cuda_10_1",
     )
 ))]
 fn main() {
@@ -131,6 +133,8 @@ fn main() {
   let a_cuda_version_feature_must_be_enabled = "v9_2";
   #[cfg(feature = "cuda_10_0")]
   let a_cuda_version_feature_must_be_enabled = "v10_0";
+  #[cfg(feature = "cuda_10_1")]
+  let a_cuda_version_feature_must_be_enabled = "v10_1";
   let v = a_cuda_version_feature_must_be_enabled;
 
   let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());

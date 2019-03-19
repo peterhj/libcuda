@@ -216,3 +216,32 @@ mod v {
   const_assert_eq!(cuda_api_version; self::cuda::__CUDA_API_VERSION, 10000);
   const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,       10000);
 }
+
+#[cfg(feature = "cuda_gte_10_1")]
+mod v10_1 {
+  const_assert!(cuda_api_version_gte; super::cuda::__CUDA_API_VERSION >= 10010);
+  const_assert!(cuda_version_gte;     super::cuda::CUDA_VERSION       >= 10010);
+}
+
+#[cfg(feature = "cuda_10_1")]
+mod v {
+  pub mod cublas            { use crate::ffi::cuda_fp16::{__half};
+                              use crate::ffi::driver_types::*;
+                              pub use crate::ffi::library_types::{cudaDataType};
+                              use crate::ffi::library_types::{libraryPropertyType};
+                              include!("v10_1/_cublas.rs");
+                              include!("v10_1/_cublas_cxx.rs"); }
+  pub mod cuda              { include!("v10_1/_cuda.rs"); }
+  pub mod cuda_fp16         { include!("v10_1/_cuda_fp16.rs"); }
+  pub mod cuda_runtime_api  { use crate::ffi::driver_types::*;
+                              include!("v10_1/_cuda_runtime_api.rs"); }
+  pub mod curand            { use crate::ffi::driver_types::*;
+                              use crate::ffi::library_types::*;
+                              include!("v10_1/_curand.rs"); }
+  pub mod driver_types      { use crate::ffi::cuda::*;
+                              include!("v10_1/_driver_types.rs"); }
+  pub mod library_types     { include!("v10_1/_library_types.rs"); }
+
+  const_assert_eq!(cuda_api_version; self::cuda::__CUDA_API_VERSION, 10010);
+  const_assert_eq!(cuda_version;     self::cuda::CUDA_VERSION,       10010);
+}

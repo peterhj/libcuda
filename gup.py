@@ -2,6 +2,7 @@ import guppy.v1 as gp
 
 def main():
   task_configs = [
+      (("cuda_10_1", "target-ubuntu_16_04.cached"), (("require_cuda", "10.1"), ("require_distro", "ubuntu 16.04"))),
       (("cuda_10_0", "target-ubuntu_16_04.cached"), (("require_cuda", "10.0"), ("require_distro", "ubuntu 16.04"))),
       (("cuda_9_2",  "target-ubuntu_16_04.cached"), (("require_cuda", "9.2"),  ("require_distro", "ubuntu 16.04"))),
       (("cuda_9_1",  "target-ubuntu_16_04.cached"), (("require_cuda", "9.1"),  ("require_distro", "ubuntu 16.04"))),
