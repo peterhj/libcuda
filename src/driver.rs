@@ -67,21 +67,21 @@ impl CuError {
 
 pub type CuResult<T=()> = Result<T, CuError>;
 
-pub fn cuda_initialized() -> bool {
+pub fn cuda_initialized() -> CuResult<bool> {
   let mut count: i32 = 0;
   let result = unsafe { cuDeviceGetCount(&mut count as *mut c_int) };
   match result {
-    CUDA_SUCCESS => true,
-    CUDA_ERROR_NOT_INITIALIZED => false,
-    e => panic!("cuDeviceGetCount failed: {:?}", CuError(e)),
+    CUDA_SUCCESS => Ok(true),
+    CUDA_ERROR_NOT_INITIALIZED => Ok(false),
+    e => Err(CuError(e)),
   }
 }
 
-pub fn cuda_init() {
+pub fn cuda_init() -> CuResult {
   let result = unsafe { cuInit(0) };
   match result {
-    CUDA_SUCCESS => {}
-    e => panic!("cuInit failed: {:?}", CuError(e)),
+    CUDA_SUCCESS => Ok(()),
+    e => Err(CuError(e)),
   }
 }
 
