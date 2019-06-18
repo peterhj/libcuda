@@ -11,7 +11,7 @@ readme = "README.md"
 keywords = ["cuda"]
 
 [package.metadata.docs.rs]
-features = ["cuda_10_0"]
+features = ["cuda_10_1"]
 default-target = "x86_64-unknown-linux-gnu"
 
 [features]

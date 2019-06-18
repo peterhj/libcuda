@@ -10,7 +10,7 @@ FFI bindings are for the desired version of CUDA.
 There are several features that pin the API bindings to specific CUDA versions:
 
 - `cuda_6_5`, `cuda_7_0`, `cuda_7_5`, `cuda_8_0`, `cuda_9_0`, `cuda_9_1`,
-  `cuda_9_2`, `cuda_10_0`
+  `cuda_9_2`, `cuda_10_0`, `cuda_10_1`
 
 One and only one of these features must be set somewhere in the cargo dependency
 graph in order for the cuda crate to be used, otherwise the crate will force a
