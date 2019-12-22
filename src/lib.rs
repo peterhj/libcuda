@@ -16,8 +16,8 @@ One and only one of these features must be set somewhere in the cargo dependency
 graph in order for the cuda crate to be used, otherwise the crate will force a
 compile-time error.
 
-For further details on CUDA version compatibility, please see:
-https://docs.nvidia.com/deploy/cuda-compatibility/index.html.
+For further details on CUDA version compatibility, please see
+[the CUDA compatibility guide.](https://docs.nvidia.com/deploy/cuda-compatibility/index.html)
 
 ### Recommendations
 
