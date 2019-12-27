@@ -1,3 +1,18 @@
+/*! Foreign Function Interface for CUDA libraries.
+
+Official Documentation links:
+- [Index of CUDA Toolkit Documentation](https://docs.nvidia.com/cuda/index.html)
+- [cuBLAS: The CUDA Basic Linear Algebra Subroutine library API reference guide.
+            ](https://docs.nvidia.com/cuda/cublas/index.html)
+- [CUDA Driver API reference guide.
+            ](https://docs.nvidia.com/cuda/cuda-driver-api/index.html)
+- [Math & fp16 reference guide.
+            ](https://docs.nvidia.com/cuda/cuda-math-api/index.html)
+- [Runtime API reference guide.
+            ](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
+- [cuRAND: The CUDA random number generation library API reference guide.
+            ](https://docs.nvidia.com/cuda/curand/index.html)
+*/
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
